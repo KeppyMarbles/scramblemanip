@@ -1,7 +1,5 @@
 import { setupCostForm } from "./ui/form.js";
 import { ScrambleOptimizer } from "./cube/scramble.js";
-import { Move } from "./cube/move.js";
-import { gripTransitions } from "./cube/gripTransitions.js";
 
 var optimizer;
 
@@ -11,23 +9,19 @@ function onSubmit(newConfig) {
     const scramble = ScrambleOptimizer.getScramble(document.getElementById("scramble").value);
     const depth = parseFloat(document.getElementById("depth").value);
 
-    optimizer = new ScrambleOptimizer(gripTransitions, newConfig);
+    optimizer = new ScrambleOptimizer(newConfig);
 
     console.time("optimizeTimer");
-    const result = optimizer.optimize(scramble, depth, 10000);
+    //const result = optimizer.optimize(scramble, depth, 10000);
+    optimizer.optimize(scramble, depth, 100000);
     console.timeEnd("optimizeTimer");
 
     //console.log(result);
-    const { totalCost, breakdown } = optimizer.analyze(result.bestScramble);
+    const breakdown = optimizer.analyzeBest();
 
     renderCostTable(breakdown)
-
-    if(result.bestRotation.top)
-        result.bestScramble.unshift(Move.fromString(result.bestRotation.top));
-    if(result.bestRotation.front)
-        result.bestScramble.unshift(Move.fromString(result.bestRotation.front));
-
-    document.getElementById("output").value = result.bestScramble.map(m => m.toString()).join(" ");
+    
+    document.getElementById("output").value = optimizer.getBestAsString();
     
     updateChart(optimizer.distribution);
 

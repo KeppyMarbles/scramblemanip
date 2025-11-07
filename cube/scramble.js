@@ -1,6 +1,8 @@
 import { Move } from "./move.js";
+import { gripTransitions } from "./gripTransitions.js";
 
 export class ScrambleOptimizer {
+    static transitions = gripTransitions;
     static defaultCostConfiguration = {
         regrip: 10,
         wide: 1,
@@ -64,8 +66,7 @@ export class ScrambleOptimizer {
         }
     }   
 
-    constructor(transitions, config) {
-        this.transitions = transitions;
+    constructor(config) {
         this.config = config;
         this.minScramble = scramble;
         this.minCost = Infinity;
@@ -104,8 +105,12 @@ export class ScrambleOptimizer {
         return string.split(" ").map(Move.fromString);
     }
 
+    static getScrambleString(scramble) {
+        return scramble.map(m => m.toString()).join(" ");
+    }
+
     getTransitionFor(grip, moveKey) { //TODO needed?
-        return this.transitions[grip]?.[moveKey];
+        return ScrambleOptimizer.transitions[grip]?.[moveKey];
     }
 
     computeTransitionCost(transition, move) { //TODO should probably have a better prevention of NaNs
@@ -121,20 +126,21 @@ export class ScrambleOptimizer {
     }
 
     bruteforceOptimize(moves, index = 0, currentGrip = "start", currentCost = 0) {
-        //const key = `${index}:${currentGrip}`;
-        //const prev = visited.get(key);
-        //if (prev !== undefined && prev <= currentCost) {
-        //  return;
-        //}
-        //visited.set(key, currentCost);
-        // base case
 
         // TODO maybe reset count if we're making progress?
+
         if (this.iterations > this.maxIterations) {
             return;
         }
+        if(currentCost > this.bestCost+this.depth) {
+            return;
+        }
+        if(currentCost > this.minCost+this.depth) {
+            return;
+        }
+
         if (index >= moves.length) {
-            this.iterations++;
+            
             if (currentCost < this.minCost) {
                 this.minCost = currentCost;
                 this.minScramble = ScrambleOptimizer.copyScramble(moves);
@@ -144,6 +150,7 @@ export class ScrambleOptimizer {
             //if (currentCost === 0) zeros++;
             return;
         }
+        
 
         const move = moves[index];
         const moveKey = move.toKey();
@@ -156,20 +163,12 @@ export class ScrambleOptimizer {
             return;
         }
 
-        const added = this.computeTransitionCost(transition, move); //TODO needed?
-        let newCost = currentCost + added;
-
-        // Prune immediately if cost already worse than best.
-        if (newCost > this.minCost+this.depth) {
-            return;
-        }
-
-        // --- Normal (no mutation) branch ---
-        this.bruteforceOptimize(moves, index + 1, transition.next, newCost);
+        this.iterations++;
 
         function branchWithClone(inst, mutFn, skip = 1) {
             const clone = ScrambleOptimizer.copyScramble(moves);
-            mutFn(clone, index); 
+            if(mutFn)
+              mutFn(clone, index); 
             // compute transition for clone[index] against the same currentGrip
             const moved = clone[index];
             const movedKey = moved.toKey();
@@ -177,9 +176,11 @@ export class ScrambleOptimizer {
             if (!t2) return; // invalid branch
             const added2 = inst.computeTransitionCost(t2, moved);
             const newCost2 = currentCost + added2;
-            if (newCost2 > inst.minCost+inst.depth) return; // prune
+            //if (newCost2 > inst.minCost+inst.depth) return; // prune
             inst.bruteforceOptimize(clone, index + skip, t2.next, newCost2);
         }
+
+        branchWithClone(this, null);
 
         // wide variation (single-layer wide)
         if (!move.isWide && !move.isRotation) {
@@ -214,9 +215,9 @@ export class ScrambleOptimizer {
         this.depth = depth;
         this.maxIterations = maxIterations;
 
-        let bestRotation = null;
-        let bestCost = Infinity;
-        let bestScramble = scramble;
+        this.bestRotation = null;
+        this.bestCost = Infinity;
+        this.bestScramble = scramble;
         this.distribution = new Array(300).fill(0);
 
         // TODO move this into bruteforce so that we can prune early
@@ -245,19 +246,13 @@ export class ScrambleOptimizer {
                 console.log(`Rotation ${top_rot} ${front_rot}: cost=${this.minCost}`);
                 console.log("Iterations:", this.iterations);
 
-                if (this.minCost < bestCost) {
-                    bestCost = this.minCost;
-                    bestScramble = ScrambleOptimizer.copyScramble(this.minScramble);
-                    bestRotation = {top: top_rot, front: front_rot};
+                if (this.minCost < this.bestCost) {
+                    this.bestCost = this.minCost;
+                    this.bestScramble = ScrambleOptimizer.copyScramble(this.minScramble);
+                    this.bestRotation = {top: top_rot, front: front_rot};
                 }
-
             }
-
         }
-
-        console.log(`Best rotation: ${bestRotation.top} ${bestRotation.front} with cost=${bestCost}`);
-
-        return { bestRotation, bestScramble, bestCost };
     }
     
     analyze(scramble) {
@@ -290,6 +285,21 @@ export class ScrambleOptimizer {
             currentGrip = nextGrip;
         }
 
-        return { totalCost, breakdown };
+        return breakdown;
+    }
+
+    analyzeBest() {
+        return this.analyze(this.bestScramble);
+    }
+
+    getBestAsString() {
+        if(!this.bestScramble)
+            return "";
+        if(this.bestRotation.front)
+            this.bestScramble.unshift(Move.fromString(this.bestRotation.front));
+        if(this.bestRotation.top)
+            this.bestScramble.unshift(Move.fromString(this.bestRotation.top));
+
+        return ScrambleOptimizer.getScrambleString(this.bestScramble);
     }
 }
