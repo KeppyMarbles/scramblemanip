@@ -1,0 +1,42 @@
+.cost-form {
+  max-width: 600px;
+}
+.container {
+  font-family: sans-serif;
+  font-size: 24px;
+  display: flex;
+}
+.left-section,
+.right-section {
+  flex: 1;
+  padding: 20px;
+}
+.section {
+  border: 1px solid #4442;
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 12px;
+}
+.section.grid.grip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 4px;
+}
+.section.grid.fingertricks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 4px;
+}
+label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+input {
+  width: 50px;
+  text-align: right;
+}
+h2 {
+  margin-top: 16px;
+  border-bottom: 1px solid #aaa;
+}
