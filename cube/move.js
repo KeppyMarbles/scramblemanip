@@ -1,40 +1,40 @@
-export const WIDE_EQUIVALENTS = {
-  R: 'L',
-  L: 'R',
-  U: 'D',
-  D: 'U',
-  F: 'B',
-  B: 'F'
-};
-
-export const WIDE_ROTATIONS = {
-  "R": "x",  "R'": "x'", "R2": "x2",  "R2'": "x2'",
-  "L": "x'", "L'": "x",  "L2": "x2'", "L2'": "x2",
-  "U": "y",  "U'": "y'", "U2": "y2",  "U2'": "y2'",
-  "D": "y'", "D'": "y",  "D2": "y2'", "D2'": "y2",
-  "F": "z",  "F'": "z'", "F2": "z2",  "F2'": "z2'",
-  "B": "z'", "B'": "z",  "B2": "z2'", "B2'": "z2",
-};
-
-export const TRANSPOSITIONS = { //TODO rotations?
-    "x":   { "R": "R", "L": "L", "U": "B", "B": "D", "D": "F", "F": "U" },
-    "x'":  { "R": "R", "L": "L", "U": "F", "B": "U", "D": "B", "F": "D" },
-    "x2":  { "R": "R", "L": "L", "U": "D", "B": "F", "D": "U", "F": "B" },
-    "x2'": { "R": "R", "L": "L", "U": "D", "B": "F", "D": "U", "F": "B" },
-    "y":   { "R": "F", "L": "B", "U": "U", "B": "R", "D": "D", "F": "L" },
-    "y'":  { "R": "B", "L": "F", "U": "U", "B": "L", "D": "D", "F": "R" },
-    "y2":  { "R": "L", "L": "R", "U": "U", "B": "F", "D": "D", "F": "B" },
-    "y2'": { "R": "L", "L": "R", "U": "U", "B": "F", "D": "D", "F": "B" },
-    "z":   { "R": "D", "L": "U", "U": "R", "B": "B", "D": "L", "F": "F" },
-    "z'":  { "R": "U", "L": "D", "U": "L", "B": "B", "D": "R", "F": "F" },
-    "z2":  { "R": "L", "L": "R", "U": "D", "B": "B", "D": "U", "F": "F" },
-    "z2'": { "R": "L", "L": "R", "U": "D", "B": "B", "D": "U", "F": "F" },
-}
-
-const MOVE_LIST = ["R", "L", "U", "D", "F", "B"];
-const ROTATION_LIST = ["x", "y", "z"];
-
 export class Move {
+    static MOVE_LIST = ["R", "L", "U", "D", "F", "B"];
+    static ROTATION_LIST = ["x", "y", "z"];
+
+    static TRANSPOSITIONS = { //TODO rotations?
+        "x":   { "R": "R", "L": "L", "U": "B", "B": "D", "D": "F", "F": "U" },
+        "x'":  { "R": "R", "L": "L", "U": "F", "B": "U", "D": "B", "F": "D" },
+        "x2":  { "R": "R", "L": "L", "U": "D", "B": "F", "D": "U", "F": "B" },
+        "x2'": { "R": "R", "L": "L", "U": "D", "B": "F", "D": "U", "F": "B" },
+        "y":   { "R": "F", "L": "B", "U": "U", "B": "R", "D": "D", "F": "L" },
+        "y'":  { "R": "B", "L": "F", "U": "U", "B": "L", "D": "D", "F": "R" },
+        "y2":  { "R": "L", "L": "R", "U": "U", "B": "F", "D": "D", "F": "B" },
+        "y2'": { "R": "L", "L": "R", "U": "U", "B": "F", "D": "D", "F": "B" },
+        "z":   { "R": "D", "L": "U", "U": "R", "B": "B", "D": "L", "F": "F" },
+        "z'":  { "R": "U", "L": "D", "U": "L", "B": "B", "D": "R", "F": "F" },
+        "z2":  { "R": "L", "L": "R", "U": "D", "B": "B", "D": "U", "F": "F" },
+        "z2'": { "R": "L", "L": "R", "U": "D", "B": "B", "D": "U", "F": "F" },
+    }
+
+    static WIDE_ROTATIONS = {
+        "R": "x",  "R'": "x'", "R2": "x2",  "R2'": "x2'",
+        "L": "x'", "L'": "x",  "L2": "x2'", "L2'": "x2",
+        "U": "y",  "U'": "y'", "U2": "y2",  "U2'": "y2'",
+        "D": "y'", "D'": "y",  "D2": "y2'", "D2'": "y2",
+        "F": "z",  "F'": "z'", "F2": "z2",  "F2'": "z2'",
+        "B": "z'", "B'": "z",  "B2": "z2'", "B2'": "z2",
+    };
+
+    static WIDE_EQUIVALENTS = {
+        R: 'L',
+        L: 'R',
+        U: 'D',
+        D: 'U',
+        F: 'B',
+        B: 'F'
+    };
+
     constructor(alpha, isPrime, isDouble, isRotation, isWide, sliceNum) {
         this.alpha = alpha;
         this.isPrime = isPrime;
@@ -65,11 +65,11 @@ export class Move {
         }
 
         // Face or rotation
-        if (MOVE_LIST.includes(char.toUpperCase())) {
+        if (Move.MOVE_LIST.includes(char.toUpperCase())) {
             move.alpha = char.toUpperCase();
             move.isWide = char === char.toLowerCase(); // lowercase = wide move
         } 
-        else if (ROTATION_LIST.includes(char)) {
+        else if (Move.ROTATION_LIST.includes(char)) {
             move.alpha = char;
             move.isRotation = true;
         } 
@@ -135,7 +135,7 @@ export class Move {
     }
 
     transpose(string) {
-        this.alpha = TRANSPOSITIONS[string][this.alpha];
+        this.alpha = Move.TRANSPOSITIONS[string][this.alpha];
     }
 
 

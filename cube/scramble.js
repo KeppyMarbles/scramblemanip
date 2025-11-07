@@ -1,255 +1,295 @@
-import { gripTransitions } from "./gripTransitions.js";
-import { Move, WIDE_EQUIVALENTS, WIDE_ROTATIONS } from "./move.js";
+import { Move } from "./move.js";
 
-function wideReplace(moves, index) {
-    moves[index].alpha = WIDE_EQUIVALENTS[moves[index].alpha]
-    moves[index].isWide = true;
-    let rotation = WIDE_ROTATIONS[moves[index].toKey()];
-    for(let i = index+1; i < moves.length; i++) {
-        moves[i].transpose(rotation);
-    }
-}
-
-function primeReplace(moves, index) {
-    moves[index].isPrime = true;
-}
-
-function wideReplaceDouble(moves, index) {
-    const newMove = new Move(WIDE_EQUIVALENTS[moves[index].alpha], moves[index].isPrime, false, false, true);
-    moves[index].isDouble = false;
-    moves.splice(index, 0, newMove);
-    let rotation = WIDE_ROTATIONS[moves[index].toKey()]
-    for(let i = index+1; i < moves.length; i++) {
-        moves[i].transpose(rotation);
-    }
-}
-
-
-function getTransitionFor(grip, moveKey) {
-    return (gripTransitions[grip] && gripTransitions[grip][moveKey]);
-}
-
-
-const visited = new Map();
-// Safe recursion: each variant branches on a cloned moves array.
-function bruteforce_optimize(moves, index = 0, currentGrip = "start", currentCost = 0) {
-    //const key = `${index}:${currentGrip}`;
-    //const prev = visited.get(key);
-    //if (prev !== undefined && prev <= currentCost) {
-    //  return;
-    //}
-    //visited.set(key, currentCost);
-    // base case
-    
-    // TODO maybe reset count if we're making progress?
-    if (iterations > maxIterations) {
-        return;
-    }
-    if (index >= moves.length) {
-        iterations++;
-        if (currentCost < min_cost) {
-            min_cost = currentCost;
-            min_scramble = copyScramble(moves);
-            //console.log("New best found:", currentCost, moves.map(m => m.toString()).join(" "));
+export class ScrambleOptimizer {
+    static defaultCostConfiguration = {
+        regrip: 10,
+        wide: 1,
+        double: 0,
+        alpha: {
+            "F": 0.5,
+            "B": 3.5,
+            "R": 0,
+            "L": 2,
+            "U": 0,
+            "D": 2.5,
+        },
+        grip: {
+            "F F": 0,
+            "F U": 0,
+            "F D": 0,
+            "F Bd": 2,
+            "F Bu": 2,
+            "U F": 0,
+            "U U": 1,
+            "U D": 0.5,
+            "U Bd": 2,
+            "U Bu": 2,
+            "D F": 0,
+            "D U": 0.5,
+            "D D": 1,
+            "D Bd": 2,
+            "D Bu": 2,
+            "Bd F": 2,
+            "Bd U": 2,
+            "Bd D": 2,
+            "Bd Bd": 3,
+            "Bd Bu": 3,
+            "Bu F": 2,
+            "Bu U": 2,
+            "Bu D": 2,
+            "Bu Bd": 3,
+            "Bu Bu": 3,
+        },
+        fingertrick: {
+            "right_index": 0,
+            "right_index_push": 1,
+            "right_index_middle": 0,
+            "right_ring": 1,
+            "right_ring_middle": 1.5,
+            "right_ring_push": 3,
+            "right_up": 0,
+            "right_up_double": 0,
+            "right_down": 0,
+            "right_down_double": 0,
+            "left_index": 0,
+            "left_index_push": 3,
+            "left_index_middle": 0,
+            "left_ring": 1,
+            "left_ring_middle": 1.5,
+            "left_ring_push": 3,
+            "left_up": 0,
+            "left_up_double": 0,
+            "left_down": 0,
+            "left_down_double": 0,
         }
-        distribution[currentCost*2] += 1;
-        //if (currentCost === 0) zeros++;
-        return;
+    }   
+
+    constructor(transitions, config) {
+        this.transitions = transitions;
+        this.config = config;
+        this.minScramble = scramble;
+        this.minCost = Infinity;
+        this.iterations = 0;
+        this.distribution = null;
     }
 
-    const move = moves[index];
-    const moveKey = move.toKey();
-    let transition = getTransitionFor(currentGrip, moveKey);
-
-    if (!transition) {
-        //currentGrip = "start";
-        //transition = getTransitionFor(currentGrip, moveKey);
-        // No valid transition defined; treat as costly and prune
-        return;
+    static wideReplace(moves, index) {
+        moves[index].alpha = Move.WIDE_EQUIVALENTS[moves[index].alpha]
+        moves[index].isWide = true;
+        let rotation = Move.WIDE_ROTATIONS[moves[index].toKey()];
+        for(let i = index+1; i < moves.length; i++) {
+            moves[i].transpose(rotation);
+        }
     }
 
-    const added = computeTransitionCost(transition, move);
-    let newCost = currentCost + added;
-
-    // Prune immediately if cost already worse than best.
-    if (newCost > min_cost+depth) {
-        return;
+    static primeReplace(moves, index) {
+        moves[index].isPrime = true;
     }
 
-
-    // --- Normal (no mutation) branch ---
-    bruteforce_optimize(moves, index + 1, transition.next, newCost);
-
-    function branchWithClone(mutFn, skip = 1) {
-        const clone = copyScramble(moves);
-        mutFn(clone, index); 
-        // compute transition for clone[index] against the same currentGrip
-        const moved = clone[index];
-        const movedKey = moved.toKey();
-        const t2 = getTransitionFor(currentGrip, movedKey);
-        if (!t2) return; // invalid branch
-        const added2 = computeTransitionCost(t2, moved);
-        const newCost2 = currentCost + added2;
-        if (newCost2 > min_cost+depth) return; // prune
-        bruteforce_optimize(clone, index + skip, t2.next, newCost2);
+    static wideReplaceDouble(moves, index) {
+        const newMove = new Move(Move.WIDE_EQUIVALENTS[moves[index].alpha], moves[index].isPrime, false, false, true);
+        moves[index].isDouble = false;
+        moves.splice(index, 0, newMove);
+        let rotation = Move.WIDE_ROTATIONS[moves[index].toKey()]
+        for(let i = index+1; i < moves.length; i++) {
+            moves[i].transpose(rotation);
+        }
     }
 
-    // wide variation (single-layer wide)
-    if (!move.isWide && !move.isRotation) {
-        branchWithClone((arr, idx) => wideReplace(arr, idx), 1);
+    static copyScramble(moves) {
+        return moves.map(move=>new Move(move.alpha, move.isPrime, move.isDouble, move.isRotation, move.isWide, move.sliceNum));
     }
 
-    // prime variation for double (turn R2 into R' variant)
-    if (move.isDouble && !move.isPrime && !move.isRotation) {
-        branchWithClone((arr, idx) => primeReplace(arr, idx), 1);
+    static getScramble(string) {
+        return string.split(" ").map(Move.fromString);
     }
 
-    // wideReplaceDouble (insert a new move equivalent for wide double)
-    //f (move.isDouble && !move.isRotation) {
-    //   // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
-    //   branchWithClone((arr, idx) => wideReplaceDouble(arr, idx), 2);
-    //
-
-    // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
-    if (move.isDouble && !move.isRotation && !move.isWide) {
-        // prime + wide (prime then wideReplace)
-        branchWithClone((arr, idx) => { primeReplace(arr, idx); wideReplace(arr, idx); }, 1);
-
-        // prime + wideReplaceDouble
-        //branchWithClone((arr, idx) => { primeReplace(arr, idx); wideReplaceDouble(arr, idx); }, 2);
+    getTransitionFor(grip, moveKey) { //TODO needed?
+        return this.transitions[grip]?.[moveKey];
     }
-}
 
-export function analyzeScramble(moves) {
-    let totalCost = 0;
-    let currentGrip = "start";
-    const breakdown = [];
+    computeTransitionCost(transition, move) { //TODO should probably have a better prevention of NaNs
+        let added = 0;
+        if (!transition) return 999999;
+        if (transition.regrip) added += this.config.regrip;
+        added += this.config.grip[transition.next];
+        added += this.config.fingertrick[transition.type];
+        added += this.config.alpha[move.alpha];
+        if(move.isWide) added += this.config.wide;
+        if(move.isDouble) added += this.config.double;
+        return added;
+    }
 
-    for (let i = 0; i < moves.length; i++) {
-        const move = moves[i];
+    bruteforceOptimize(moves, index = 0, currentGrip = "start", currentCost = 0) {
+        //const key = `${index}:${currentGrip}`;
+        //const prev = visited.get(key);
+        //if (prev !== undefined && prev <= currentCost) {
+        //  return;
+        //}
+        //visited.set(key, currentCost);
+        // base case
+
+        // TODO maybe reset count if we're making progress?
+        if (this.iterations > this.maxIterations) {
+            return;
+        }
+        if (index >= moves.length) {
+            this.iterations++;
+            if (currentCost < this.minCost) {
+                this.minCost = currentCost;
+                this.minScramble = ScrambleOptimizer.copyScramble(moves);
+                //console.log("New best found:", currentCost, moves.map(m => m.toString()).join(" "));
+            }
+            this.distribution[currentCost*2] += 1; //TODO
+            //if (currentCost === 0) zeros++;
+            return;
+        }
+
+        const move = moves[index];
         const moveKey = move.toKey();
+        let transition = this.getTransitionFor(currentGrip, moveKey);
 
-        const transition = getTransitionFor(currentGrip, moveKey);
         if (!transition) {
+            //currentGrip = "start";
+            //transition = getTransitionFor(currentGrip, moveKey);
+            // No valid transition defined; treat as costly and prune
+            return;
+        }
+
+        const added = this.computeTransitionCost(transition, move); //TODO needed?
+        let newCost = currentCost + added;
+
+        // Prune immediately if cost already worse than best.
+        if (newCost > this.minCost+this.depth) {
+            return;
+        }
+
+        // --- Normal (no mutation) branch ---
+        this.bruteforceOptimize(moves, index + 1, transition.next, newCost);
+
+        function branchWithClone(inst, mutFn, skip = 1) {
+            const clone = ScrambleOptimizer.copyScramble(moves);
+            mutFn(clone, index); 
+            // compute transition for clone[index] against the same currentGrip
+            const moved = clone[index];
+            const movedKey = moved.toKey();
+            const t2 = inst.getTransitionFor(currentGrip, movedKey);
+            if (!t2) return; // invalid branch
+            const added2 = inst.computeTransitionCost(t2, moved);
+            const newCost2 = currentCost + added2;
+            if (newCost2 > inst.minCost+inst.depth) return; // prune
+            inst.bruteforceOptimize(clone, index + skip, t2.next, newCost2);
+        }
+
+        // wide variation (single-layer wide)
+        if (!move.isWide && !move.isRotation) {
+            branchWithClone(this, (arr, idx) => ScrambleOptimizer.wideReplace(arr, idx), 1);
+        }
+
+        // prime variation for double (turn R2 into R' variant)
+        if (move.isDouble && !move.isPrime && !move.isRotation) {
+            branchWithClone(this, (arr, idx) => ScrambleOptimizer.primeReplace(arr, idx), 1);
+        }
+
+        // wideReplaceDouble (insert a new move equivalent for wide double)
+        //f (move.isDouble && !move.isRotation) {
+        //   // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
+        //   branchWithClone((arr, idx) => wideReplaceDouble(arr, idx), 2);
+        //
+
+        // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
+        if (move.isDouble && !move.isRotation && !move.isWide) {
+            // prime + wide (prime then wideReplace)
+            branchWithClone(this, (arr, idx) => { ScrambleOptimizer.primeReplace(arr, idx); ScrambleOptimizer.wideReplace(arr, idx); }, 1);
+
+            // prime + wideReplaceDouble
+            //branchWithClone((arr, idx) => { primeReplace(arr, idx); wideReplaceDouble(arr, idx); }, 2);
+        }
+    }
+
+    optimize(scramble, depth, maxIterations) {
+        const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
+        const front_rotations = ["", "y", "y2", "y'"];
+
+        this.depth = depth;
+        this.maxIterations = maxIterations;
+
+        let bestRotation = null;
+        let bestCost = Infinity;
+        let bestScramble = scramble;
+        this.distribution = new Array(300).fill(0);
+
+        // TODO move this into bruteforce so that we can prune early
+        for (const top_rot of top_rotations) {
+            for(const front_rot of front_rotations) {
+
+                const rotatedScramble = ScrambleOptimizer.copyScramble(scramble);
+                // transpose all moves according to the starting rotation
+                if (top_rot !== "") {
+                    for (const move of rotatedScramble) {
+                        move.transpose(top_rot);
+                    }
+                }
+                if (front_rot !== "") {
+                    for (const move of rotatedScramble) {
+                        move.transpose(front_rot);
+                    }
+                }
+
+                this.minCost = Infinity;
+                this.minScramble = scramble;
+                this.iterations = 0;
+
+                this.bruteforceOptimize(rotatedScramble);
+
+                console.log(`Rotation ${top_rot} ${front_rot}: cost=${this.minCost}`);
+                console.log("Iterations:", this.iterations);
+
+                if (this.minCost < bestCost) {
+                    bestCost = this.minCost;
+                    bestScramble = ScrambleOptimizer.copyScramble(this.minScramble);
+                    bestRotation = {top: top_rot, front: front_rot};
+                }
+
+            }
+
+        }
+
+        console.log(`Best rotation: ${bestRotation.top} ${bestRotation.front} with cost=${bestCost}`);
+
+        return { bestRotation, bestScramble, bestCost };
+    }
+    
+    analyze(scramble) {
+        let totalCost = 0;
+        let currentGrip = "start";
+        const breakdown = [];
+
+        for (let i = 0; i < scramble.length; i++) {
+            const move = scramble[i];
+            const moveKey = move.toKey();
+
+            const transition = this.getTransitionFor(currentGrip, moveKey);
+            if (!transition) {
+                break; // stop early if invalid
+            }
+
+            const nextGrip = transition.next;
+            const added = this.computeTransitionCost(transition, move);
+            //console.log("added", added)
+
             breakdown.push({
                 move: move.toString(),
                 grip: currentGrip,
-                next: "(invalid)",
-                transition: null,
-                addedCost: 999999,
+                next: nextGrip,
+                transition,
+                addedCost: added,
             });
-            totalCost += 999999;
-            break; // stop early if invalid
+
+            totalCost += added;
+            currentGrip = nextGrip;
         }
 
-        const nextGrip = transition.next;
-        const added = computeTransitionCost(transition, move);
-        //console.log("added", added)
-
-        breakdown.push({
-            move: move.toString(),
-            grip: currentGrip,
-            next: nextGrip,
-            transition,
-            addedCost: added,
-        });
-
-        totalCost += added;
-        currentGrip = nextGrip;
+        return { totalCost, breakdown };
     }
-
-    return { totalCost, breakdown };
 }
-
-function copyScramble(moves) {
-    return moves.map(move=>new Move(move.alpha, move.isPrime, move.isDouble, move.isRotation, move.isWide, move.sliceNum));
-}
-
-export function getScramble(string) {
-    return string.split(" ").map(Move.fromString);
-}
-
-//var bestRotationCost = 9999;
-
-export function optimizeScramble(baseScramble, newConfig, newDepth) {
-    const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
-    const front_rotations = ["", "y", "y2", "y'"];
-
-    config = newConfig;
-    console.log(config);
-    depth = newDepth;
-    let bestRotation = null;
-    let bestCost = Infinity;
-    let bestScramble = baseScramble;
-    distribution = new Array(300).fill(0);
-
-    // TODO move this into bruteforce so that we can prune early
-    for (const top_rot of top_rotations) {
-
-        
-        for(const front_rot of front_rotations) {
-            
-            const rotatedScramble = copyScramble(baseScramble);
-            // transpose all moves according to the starting rotation
-            if (top_rot !== "") {
-                for (const move of rotatedScramble) {
-                    move.transpose(top_rot);
-                }
-            }
-            if (front_rot !== "") {
-                for (const move of rotatedScramble) {
-                    move.transpose(front_rot);
-                }
-            }
-
-            min_cost = Infinity;
-            min_scramble = baseScramble;
-            iterations = 0;
-            //zeros = 0;
-
-            bruteforce_optimize(rotatedScramble);
-
-            console.log(`Rotation ${top_rot} ${front_rot}: cost=${min_cost}`);
-            console.log("Iterations:", iterations);
-
-            if (min_cost < bestCost) {
-                bestCost = min_cost;
-                //bestRotationCost = min_cost;
-                bestScramble = copyScramble(min_scramble);
-                bestRotation = {top: top_rot, front: front_rot};
-            }
-            
-        }
-
-    }
-    console.log(distribution);
-    console.log(`Best rotation: ${bestRotation.top} ${bestRotation.front} with cost=${bestCost}`);
-
-
-    
-    return { bestRotation, bestScramble, bestCost };
-}
-
-
-function computeTransitionCost(transition, move) { //TODO should probably have a better prevention of NaNs
-    let added = 0;
-    if (!transition) return 999999;
-    if (transition.regrip) added += config.regrip;
-    added += config.grip[transition.next];
-    added += config.fingertrick[transition.type];
-    added += config.alpha[move.alpha];
-    if(move.isWide) added += config.wide;
-    if(move.isDouble) added += config.double;
-    return added;
-}
-
-var maxIterations = 10000;
-export var distribution;
-
-var config;
-var depth = 0;
-
-var min_scramble;
-var min_cost = 9999;
-var iterations = 0;
-var zeros = 0;

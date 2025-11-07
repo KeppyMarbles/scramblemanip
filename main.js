@@ -1,18 +1,24 @@
 import { setupCostForm } from "./ui/form.js";
-import { defaultCostConfiguration } from "./cube/costConfig.js";
-import { getScramble, optimizeScramble, analyzeScramble, distribution } from "./cube/scramble.js";
+import { ScrambleOptimizer } from "./cube/scramble.js";
 import { Move } from "./cube/move.js";
+import { gripTransitions } from "./cube/gripTransitions.js";
+
+var optimizer;
 
 function onSubmit(newConfig) {
     
     //document.getElementById("breakdown").value = "";
-    const scramble = getScramble(document.getElementById("scramble").value);
+    const scramble = ScrambleOptimizer.getScramble(document.getElementById("scramble").value);
     const depth = parseFloat(document.getElementById("depth").value);
+
+    optimizer = new ScrambleOptimizer(gripTransitions, newConfig);
+
     console.time("optimizeTimer");
-    const result = optimizeScramble(scramble, newConfig, depth);
+    const result = optimizer.optimize(scramble, depth, 10000);
     console.timeEnd("optimizeTimer");
-    console.log(result);
-    const { totalCost, breakdown } = analyzeScramble(result.bestScramble);
+
+    //console.log(result);
+    const { totalCost, breakdown } = optimizer.analyze(result.bestScramble);
 
     renderCostTable(breakdown)
 
@@ -23,7 +29,7 @@ function onSubmit(newConfig) {
 
     document.getElementById("output").value = result.bestScramble.map(m => m.toString()).join(" ");
     
-    updateChart(distribution);
+    updateChart(optimizer.distribution);
 
 }
 
@@ -76,4 +82,4 @@ function renderCostTable(breakdowns) {
   tbody.appendChild(totalRow);
 }
 
-setupCostForm(defaultCostConfiguration, onSubmit);
+setupCostForm(ScrambleOptimizer.defaultCostConfiguration, onSubmit);
