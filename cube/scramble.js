@@ -1,7 +1,6 @@
 import { gripTransitions } from "./gripTransitions.js";
 import { Move, WIDE_EQUIVALENTS, WIDE_ROTATIONS } from "./move.js";
 
-
 function wideReplace(moves, index) {
     moves[index].alpha = WIDE_EQUIVALENTS[moves[index].alpha]
     moves[index].isWide = true;
@@ -41,6 +40,11 @@ function bruteforce_optimize(moves, index = 0, currentGrip = "start", currentCos
     //}
     //visited.set(key, currentCost);
     // base case
+    
+    // TODO maybe reset count if we're making progress?
+    if (iterations > maxIterations) {
+        return;
+    }
     if (index >= moves.length) {
         iterations++;
         if (currentCost < min_cost) {
@@ -48,15 +52,18 @@ function bruteforce_optimize(moves, index = 0, currentGrip = "start", currentCos
             min_scramble = copyScramble(moves);
             //console.log("New best found:", currentCost, moves.map(m => m.toString()).join(" "));
         }
-        if (currentCost === 0) zeros++;
+        distribution[currentCost*2] += 1;
+        //if (currentCost === 0) zeros++;
         return;
     }
 
     const move = moves[index];
     const moveKey = move.toKey();
-    const transition = getTransitionFor(currentGrip, moveKey);
+    let transition = getTransitionFor(currentGrip, moveKey);
 
     if (!transition) {
+        //currentGrip = "start";
+        //transition = getTransitionFor(currentGrip, moveKey);
         // No valid transition defined; treat as costly and prune
         return;
     }
@@ -68,6 +75,7 @@ function bruteforce_optimize(moves, index = 0, currentGrip = "start", currentCos
     if (newCost > min_cost+depth) {
         return;
     }
+
 
     // --- Normal (no mutation) branch ---
     bruteforce_optimize(moves, index + 1, transition.next, newCost);
@@ -161,6 +169,7 @@ export function getScramble(string) {
     return string.split(" ").map(Move.fromString);
 }
 
+//var bestRotationCost = 9999;
 
 export function optimizeScramble(baseScramble, newConfig, newDepth) {
     const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
@@ -172,10 +181,14 @@ export function optimizeScramble(baseScramble, newConfig, newDepth) {
     let bestRotation = null;
     let bestCost = Infinity;
     let bestScramble = baseScramble;
+    distribution = new Array(300).fill(0);
 
     // TODO move this into bruteforce so that we can prune early
     for (const top_rot of top_rotations) {
+
+        
         for(const front_rot of front_rotations) {
+            
             const rotatedScramble = copyScramble(baseScramble);
             // transpose all moves according to the starting rotation
             if (top_rot !== "") {
@@ -201,14 +214,18 @@ export function optimizeScramble(baseScramble, newConfig, newDepth) {
 
             if (min_cost < bestCost) {
                 bestCost = min_cost;
+                //bestRotationCost = min_cost;
                 bestScramble = copyScramble(min_scramble);
                 bestRotation = {top: top_rot, front: front_rot};
             }
+            
         }
 
     }
-
+    console.log(distribution);
     console.log(`Best rotation: ${bestRotation.top} ${bestRotation.front} with cost=${bestCost}`);
+
+
     
     return { bestRotation, bestScramble, bestCost };
 }
@@ -225,6 +242,9 @@ function computeTransitionCost(transition, move) { //TODO should probably have a
     if(move.isDouble) added += config.double;
     return added;
 }
+
+var maxIterations = 10000;
+export var distribution;
 
 var config;
 var depth = 0;

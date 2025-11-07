@@ -1,5 +1,5 @@
 export const defaultCostConfiguration = {
-    regrip: 5,
+    regrip: 10,
     wide: 1,
     double: 0,
     alpha: {

@@ -7,8 +7,13 @@
   display: flex;
 }
 .left-section,
-.right-section {
+.middle-section {
   flex: 1;
+  padding: 20px;
+  font-size: 20px;
+}
+.right-section {
+  flex: 2;
   padding: 20px;
 }
 .section {

@@ -121,7 +121,6 @@ export class Move {
         let s = "";
         if (this.sliceNum > 2) s += this.sliceNum;
         s += (this.isWide || this.isRotation) ? this.alpha.toLowerCase() : this.alpha;
-        //s += this.isRotation ? this.alpha : (this.isWide ? this.alpha.toLowerCase() : this.alpha);
         if (this.sliceNum > 1) s += "w";
         if (this.isDouble) s += "2";
         if (this.isPrime) s += "'";

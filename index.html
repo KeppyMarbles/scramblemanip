@@ -9,36 +9,44 @@
 <div class="container">
     <div class="left-section">
         <h2>Scramble</h2>
-        <input type="text" id="scramble" placeholder="Enter scramble" value="F D R U", style="width: 300px;"/>
+        <input type="text" id="scramble" placeholder="Enter scramble" value="B' D' L F R B R D R U F2 L2 B2 U' L2 D2 F2 D L2 U'", style="width: 350px;"/>
         <input type="number" id="depth" placeholder="" value="0"/>
         <button id="submitButton">Submit</button>
         <div>
-          <textarea id="currentBest" rows="1" cols="20" readonly></textarea>
+            <textarea id="output" rows="3" cols="30" style="font-size: 2rem;" readonly></textarea>
         </div>
-        <div>
-          <textarea id="breakdown" rows="50" cols="30" style="font-size: 2rem;" readonly></textarea>
-        </div>
+        <h3>Cost Distribution</h3>
+        <div id="myChart" style="width:600px;height:400px;"></div>
     </div>
-    <div class="right_section">   
+    <div class="middle-section">
+        <h2>Breakdown</h2>
+        <table id="costTable">
+          <thead>
+            <tr><th>Move</th><th>Next Grip</th><th>Fingertrick</th><th>Cost</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+    </div>
+    <div class="right-section">   
         <form id="costForm" class="cost-form">
-          <h2>General</h2>
+          <h2>Cost Configuration</h2>
           <div class="section">
             <label>Regrip <input type="number" step="0.5" name="regrip"></label><br>
             <label>Wide <input type="number" step="0.5" name="wide"></label><br>
             <label>Double <input type="number" step="0.5" name="double"></label><br>
           </div>
       
-          <h2>Face</h2>
+          <h3>Face</h3>
           <div class="section" data-group="alpha">
             <!-- generated dynamically -->
           </div>
       
-          <h2>Grip Transitions</h2>
+          <h3>Thumb Placement</h3>
           <div class="section grid grip" data-group="grip">
             <!-- generated dynamically -->
           </div>
       
-          <h2>Fingertricks</h2>
+          <h3>Fingertricks</h3>
           <div class="section grid fingertricks" data-group="fingertrick">
             <!-- generated dynamically -->
           </div>
@@ -50,3 +58,4 @@
 </div>
 
 <script type="module" src="main.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
