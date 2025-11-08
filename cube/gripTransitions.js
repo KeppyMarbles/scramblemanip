@@ -1119,7 +1119,7 @@ export const gripTransitions = {
   "U U": {
     "B": {
       "next": "U U",
-      "type": "right_middle",
+      "type": "right_index",
       "regrip": false
     },
     "B2": {
@@ -2253,34 +2253,1424 @@ export const gripTransitions = {
     }
   },
   "Bu F": {
-    
+    "B": {
+      "next": "Bu U",
+      "type": "right_index",
+      "regrip": true
+    },
+    "B2": {
+      "next": "Bu U",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "U F",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "U F",
+      "type": "left_index",
+      "regrip": true
+    },
+    "D": {
+      "next": "Bu F",
+      "type": "right_ring_push",
+      "regrip": false
+    },
+    "D2": {
+      "next": "F F",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bu F",
+      "type": "right_ring_middle",
+      "regrip": false
+    },
+    "D'": {
+      "next": "Bu F",
+      "type": "right_ring",
+      "regrip": false
+    },    
+    "L": {
+      "next": "U F",
+      "type": "left_down",
+      "regrip": false
+    },
+    "L2": {
+      "next": "F F",
+      "type": "left_down_double",
+      "regrip": false
+    },
+    "L2'": {
+      "next": "U F",
+      "type": "left_up_double",
+      "regrip": true
+    },
+    "L'": {
+      "next": "F F",
+      "type": "left_up",
+      "regrip": true
+    },   
+    "R": {
+      "next": "Bu U",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bu Bu",
+      "type": "right_up_double",
+      "regrip": false
+    },
+    "R2'": {
+      "next": "Bu Bd",
+      "type": "right_down_double",
+      "regrip": false
+    },
+    "R'": {
+      "next": "Bu D",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bu F",
+      "type": "right_index",
+      "regrip": false
+    },
+    "U2": {
+      "next": "Bu F",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "U2'": {
+      "next": "F F",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "Bu F",
+      "type": "right_index_push",
+      "regrip": false
+    },
+    "F": {
+      "next": "Bu D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bu D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D F",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D F",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "D U",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2": {
+      "next": "F Bu",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F Bd",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x'": {
+      "next": "U D",
+      "type": "rotation",
+      "regrip": false
+    }
   },
   "Bu U": {
-
+    "B": {
+      "next": "Bu U",
+      "type": "right_index",
+      "regrip": false
+    },
+    "B2": {
+      "next": "Bu U",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "B2'": {
+      "next": "U U",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "U U",
+      "type": "left_index",
+      "regrip": true
+    },
+    "D": {
+      "next": "F U",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F U",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bu F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bu F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "U U",
+      "type": "left_down",
+      "regrip": false
+    },
+    "L2": {
+      "next": "F U",
+      "type": "left_down_double",
+      "regrip": false
+    },
+    "L2'": {
+      "next": "U U",
+      "type": "left_up_double",
+      "regrip": true
+    },
+    "L'": {
+      "next": "F F",
+      "type": "left_up",
+      "regrip": true
+    },   
+    "R": {
+      "next": "Bu Bu",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bu U",
+      "type": "right_up_double",
+      "regrip": true
+    },
+    "R2'": {
+      "next": "Bu D",
+      "type": "right_down_double",
+      "regrip": false
+    },
+    "R'": {
+      "next": "Bu F",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bu U",
+      "type": "right_index",
+      "regrip": false
+    },
+    "U2": {
+      "next": "Bu F",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "U2'": {
+      "next": "F U",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "Bu U",
+      "type": "right_index_push",
+      "regrip": false
+    },
+    "F": {
+      "next": "Bu U",
+      "type": "right_ring_push",
+      "regrip": false
+    },
+    "F2": {
+      "next": "Bu D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "Bu U",
+      "type": "right_ring_middle",
+      "regrip": false 
+    },
+    "F'": {
+      "next": "Bu U",
+      "type": "right_ring",
+      "regrip": false
+    },
+    "x": {
+      "next": "F Bu",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F D",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x'": {
+      "next": "U F",
+      "type": "rotation",
+      "regrip": true
+    }
   },
   "Bu D": {
-
+    "B": {
+      "next": "Bu D",
+      "type": "right_ring_push",
+      "regrip": false
+    },
+    "B2": {
+      "next": "D D",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bu D",
+      "type": "right_ring_middle",
+      "regrip": false
+    },
+    "B'": {
+      "next": "Bu D",
+      "type": "right_ring",
+      "regrip": false
+    },
+    "D": {
+      "next": "F D",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F D",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bu F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bu F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "U D",
+      "type": "left_down",
+      "regrip": false
+    },
+    "L2": {
+      "next": "F D",
+      "type": "left_down_double",
+      "regrip": false
+    },
+    "L2'": {
+      "next": "U D",
+      "type": "left_up_double",
+      "regrip": true
+    },
+    "L'": {
+      "next": "F D",
+      "type": "left_up",
+      "regrip": true
+    },   
+    "R": {
+      "next": "Bu F",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bu U",
+      "type": "right_up_double",
+      "regrip": false
+    },
+    "R2'": {
+      "next": "Bu D",
+      "type": "right_down_double",
+      "regrip": true
+    },
+    "R'": {
+      "next": "Bu Bd",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bu F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bu F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F D",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "F D",
+      "type": "left_index",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bu D",
+      "type": "right_index",
+      "regrip": false
+    },
+    "F2": {
+      "next": "Bu D",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "F2'": {
+      "next": "D D",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "Bu D",
+      "type": "right_index_push",
+      "regrip": false
+    },
+    "x": {
+      "next": "D F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2": {
+      "next": "F U",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "U Bd",
+      "type": "rotation",
+      "regrip": false
+    }
   },
   "Bu Bu": {
-
+    "B": {
+      "next": "Bu U",
+      "type": "right_index",
+      "regrip": true
+    },
+    "B2": {
+      "next": "Bu U",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bu D",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "Bu D",
+      "type": "right_ring",
+      "regrip": true
+    },
+    "D": {
+      "next": "F Bu",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F Bu",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bu F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bu F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "U Bu",
+      "type": "left_down",
+      "regrip": false
+    },
+    "L2": {
+      "next": "F Bu",
+      "type": "left_down_double",
+      "regrip": false
+    },
+    "L2'": {
+      "next": "U Bu",
+      "type": "left_up_double",
+      "regrip": true
+    },
+    "L'": {
+      "next": "U Bu",
+      "type": "left_up",
+      "regrip": true
+    },   
+    "R": {
+      "next": "Bu F",
+      "type": "right_up",
+      "regrip": true
+    },
+    "R2": {
+      "next": "Bu U",
+      "type": "right_up_double",
+      "regrip": true
+    },
+    "R2'": {
+      "next": "Bu F",
+      "type": "right_down_double",
+      "regrip": false
+    },
+    "R'": {
+      "next": "Bu U",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bu F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bu F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F Bu",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "F Bu",
+      "type": "left_index",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bu D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bu D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D Bu",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D Bu",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x'": {
+      "next": "U U",
+      "type": "rotation",
+      "regrip": false
+    }
   },
   "Bu Bd": {
-
+    "B": {
+      "next": "Bu D",
+      "type": "right_ring_push",
+      "regrip": true
+    },
+    "B2": {
+      "next": "D Bd",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bu D",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "Bu D",
+      "type": "right_ring",
+      "regrip": true
+    },
+    "D": {
+      "next": "F Bd",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F Bd",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bu F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bu F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "U Bd",
+      "type": "left_down",
+      "regrip": false
+    },
+    "L2": {
+      "next": "F Bd",
+      "type": "left_down_double",
+      "regrip": false
+    },
+    "L2'": {
+      "next": "U Bd",
+      "type": "left_up_double",
+      "regrip": true
+    },
+    "L'": {
+      "next": "F Bd",
+      "type": "left_up",
+      "regrip": true
+    },   
+    "R": {
+      "next": "Bu D",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bu F",
+      "type": "right_up_double",
+      "regrip": false
+    },
+    "R2'": {
+      "next": "Bu D",
+      "type": "right_down_double",
+      "regrip": true
+    },
+    "R'": {
+      "next": "Bu F",
+      "type": "right_down",
+      "regrip": true
+    },
+    "U": {
+      "next": "Bu F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bu F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F Bd",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "F Bd",
+      "type": "left_index",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bu D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bu D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D Bd",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D Bd",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "D D",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "U U",
+      "type": "rotation",
+      "regrip": true
+    }
   },
   "Bd F": {
-
+    "B": {
+      "next": "D F",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "B2": {
+      "next": "D F",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bd D",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "Bd D",
+      "type": "right_ring",
+      "regrip": true
+    },
+    "D": {
+      "next": "Bd F",
+      "type": "right_ring_push",
+      "regrip": false
+    },
+    "D2": {
+      "next": "F F",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bd F",
+      "type": "right_ring_middle",
+      "regrip": false
+    },
+    "D'": {
+      "next": "Bd F",
+      "type": "right_ring",
+      "regrip": false
+    },    
+    "L": {
+      "next": "F F",
+      "type": "left_down",
+      "regrip": true
+    },
+    "L2": {
+      "next": "D F",
+      "type": "left_down_double",
+      "regrip": true
+    },
+    "L2'": {
+      "next": "F F",
+      "type": "left_up_double",
+      "regrip": false
+    },
+    "L'": {
+      "next": "D F",
+      "type": "left_up",
+      "regrip": false
+    },   
+    "R": {
+      "next": "Bd U",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bd Bu",
+      "type": "right_up_double",
+      "regrip": false
+    },
+    "R2'": {
+      "next": "Bd Bd",
+      "type": "right_down_double",
+      "regrip": false
+    },
+    "R'": {
+      "next": "Bd D",
+      "type": "right_down",
+      "regrip": true
+    },
+    "U": {
+      "next": "Bd F",
+      "type": "right_index",
+      "regrip": false
+    },
+    "U2": {
+      "next": "Bd F",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "U2'": {
+      "next": "F F",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "Bd F",
+      "type": "right_index_push",
+      "regrip": false
+    },
+    "F": {
+      "next": "Bd D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bd D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D F",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D F",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "D U",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2": {
+      "next": "F Bu",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2'": {
+      "next": "F Bd",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "F D",
+      "type": "rotation",
+      "regrip": true
+    }
   },
   "Bd U": {
-
+    "B": {
+      "next": "Bd U",
+      "type": "right_index",
+      "regrip": false
+    },
+    "B2": {
+      "next": "Bd U",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "B2'": {
+      "next": "Bd D",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "Bd D",
+      "type": "right_ring",
+      "regrip": true
+    },
+    "D": {
+      "next": "Bd F",
+      "type": "right_ring_push",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F U",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bd F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bd F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "F U",
+      "type": "left_down",
+      "regrip": true
+    },
+    "L2": {
+      "next": "D F",
+      "type": "left_down_double",
+      "regrip": true
+    },
+    "L2'": {
+      "next": "F U",
+      "type": "left_up_double",
+      "regrip": false
+    },
+    "L'": {
+      "next": "D U",
+      "type": "left_up",
+      "regrip": false
+    },   
+    "R": {
+      "next": "Bd Bu",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bd U",
+      "type": "right_up_double",
+      "regrip": true
+    },
+    "R2'": {
+      "next": "Bd D",
+      "type": "right_down_double",
+      "regrip": false
+    },
+    "R'": {
+      "next": "Bd F",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bd F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bd F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F U",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "Bd U",
+      "type": "right_index_push",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bd D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bd D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D U",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D U",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "D Bu",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F D",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    }
   },
   "Bd D": {
-
+    "B": {
+      "next": "Bd D",
+      "type": "right_ring_push",
+      "regrip": false
+    },
+    "B2": {
+      "next": "D D",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bd D",
+      "type": "right_ring_middle",
+      "regrip": false
+    },
+    "B'": {
+      "next": "Bd D",
+      "type": "right_ring",
+      "regrip": false
+    },
+    "D": {
+      "next": "Bd F",
+      "type": "right_ring_push",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F D",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bd F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bd F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "F D",
+      "type": "left_down",
+      "regrip": true
+    },
+    "L2": {
+      "next": "D D",
+      "type": "left_down_double",
+      "regrip": true
+    },
+    "L2'": {
+      "next": "F D",
+      "type": "left_up_double",
+      "regrip": false
+    },
+    "L'": {
+      "next": "D D",
+      "type": "left_up",
+      "regrip": false
+    },   
+    "R": {
+      "next": "Bd F",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bd U",
+      "type": "right_up_double",
+      "regrip": false
+    },
+    "R2'": {
+      "next": "Bd D",
+      "type": "right_down_double",
+      "regrip": true
+    },
+    "R'": {
+      "next": "Bd Bd",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bd F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bd F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F D",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "F D",
+      "type": "left_index",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bd D",
+      "type": "right_index",
+      "regrip": false
+    },
+    "F2": {
+      "next": "Bd D",
+      "type": "right_index_middle",
+      "regrip": false
+    },
+    "F2'": {
+      "next": "D D",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "Bd D",
+      "type": "right_index_push",
+      "regrip": false
+    },
+    "x": {
+      "next": "D F",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2": {
+      "next": "F U",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2'": {
+      "next": "F D",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "F Bd",
+      "type": "rotation",
+      "regrip": true
+    }
   },
   "Bd Bu": {
-
+    "B": {
+      "next": "Bd U",
+      "type": "right_index",
+      "regrip": true
+    },
+    "B2": {
+      "next": "Bd U",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bd D",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "Bd D",
+      "type": "right_ring",
+      "regrip": true
+    },
+    "D": {
+      "next": "F Bu",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F Bu",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bd F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bd F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "F Bu",
+      "type": "left_down",
+      "regrip": true
+    },
+    "L2": {
+      "next": "D Bu",
+      "type": "left_down_double",
+      "regrip": true
+    },
+    "L2'": {
+      "next": "F Bu",
+      "type": "left_up_double",
+      "regrip": false
+    },
+    "L'": {
+      "next": "D Bu",
+      "type": "left_up",
+      "regrip": false
+    },   
+    "R": {
+      "next": "Bd F",
+      "type": "right_up",
+      "regrip": true
+    },
+    "R2": {
+      "next": "Bd U",
+      "type": "right_up_double",
+      "regrip": true
+    },
+    "R2'": {
+      "next": "Bd F",
+      "type": "right_down_double",
+      "regrip": false
+    },
+    "R'": {
+      "next": "Bd U",
+      "type": "right_down",
+      "regrip": false
+    },
+    "U": {
+      "next": "Bd F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bd F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F Bu",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "F Bu",
+      "type": "left_index",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bd D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bd D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D Bu",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D Bu",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "D F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x2'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "F U",
+      "type": "rotation",
+      "regrip": true
+    }
   },
   "Bd Bd": {
-
+    "B": {
+      "next": "D Bd",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "B2": {
+      "next": "D Bd",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "B2'": {
+      "next": "Bd D",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "B'": {
+      "next": "Bd D",
+      "type": "right_ring",
+      "regrip": true
+    },
+    "D": {
+      "next": "F Bd",
+      "type": "left_ring",
+      "regrip": true
+    },
+    "D2": {
+      "next": "F Bd",
+      "type": "left_ring_middle",
+      "regrip": true
+    },
+    "D2'": {
+      "next": "Bd F",
+      "type": "right_ring_middle",
+      "regrip": true
+    },
+    "D'": {
+      "next": "Bd F",
+      "type": "right_ring",
+      "regrip": true
+    },    
+    "L": {
+      "next": "F Bd",
+      "type": "left_down",
+      "regrip": true
+    },
+    "L2": {
+      "next": "D Bd",
+      "type": "left_down_double",
+      "regrip": true
+    },
+    "L2'": {
+      "next": "F Bd",
+      "type": "left_up_double",
+      "regrip": false
+    },
+    "L'": {
+      "next": "D Bd",
+      "type": "left_up",
+      "regrip": false
+    },   
+    "R": {
+      "next": "Bd D",
+      "type": "right_up",
+      "regrip": false
+    },
+    "R2": {
+      "next": "Bd F",
+      "type": "right_up_double",
+      "regrip": false
+    },
+    "R2'": {
+      "next": "Bd D",
+      "type": "right_down_double",
+      "regrip": true
+    },
+    "R'": {
+      "next": "Bd F",
+      "type": "right_down",
+      "regrip": true
+    },
+    "U": {
+      "next": "Bd F",
+      "type": "right_index",
+      "regrip": true
+    },
+    "U2": {
+      "next": "Bd F",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "U2'": {
+      "next": "F Bd",
+      "type": "left_index_middle",
+      "regrip": true
+    },
+    "U'": {
+      "next": "F Bd",
+      "type": "left_index",
+      "regrip": true
+    },
+    "F": {
+      "next": "Bd D",
+      "type": "right_index",
+      "regrip": true
+    },
+    "F2": {
+      "next": "Bd D",
+      "type": "right_index_middle",
+      "regrip": true
+    },
+    "F2'": {
+      "next": "D Bd",
+      "type": "left_index_middle",
+      "regrip": true 
+    },
+    "F'": {
+      "next": "D Bd",
+      "type": "left_index",
+      "regrip": true
+    },
+    "x": {
+      "next": "D D",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": false
+    },
+    "x2'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    },
+    "x'": {
+      "next": "F F",
+      "type": "rotation",
+      "regrip": true
+    }
   }
 }
 
