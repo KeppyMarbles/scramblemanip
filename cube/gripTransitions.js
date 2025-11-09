@@ -3673,4 +3673,3 @@ export const gripTransitions = {
     }
   }
 }
-

@@ -11,11 +11,11 @@ export class ScrambleOptimizer {
             "F": 0.5, "B": 3.5, "R": 0, "L": 2, "U": 0, "D": 2.5,
         },
         grip: {
-            "F F": 0, "F U": 0, "F D": 0, "F Bd": 2, "F Bu": 2, 
-            "U F": 0, "U U": 1, "U D": 0.5, "U Bd": 2, "U Bu": 2, 
-            "D F": 0, "D U": 0.5, "D D": 1, "D Bd": 2, "D Bu": 2, 
-            "Bd F": 2, "Bd U": 2, "Bd D": 2, "Bd Bd": 3, "Bd Bu": 3, 
-            "Bu F": 2, "Bu U": 2, "Bu D": 2, "Bu Bd": 3, "Bu Bu": 3,
+            "F F": 0, "F U": 0, "F D": 0, "F Bd": 2.5, "F Bu": 2.5, 
+            "U F": 0, "U U": 1, "U D": 0.5, "U Bd": 2.5, "U Bu": 2.5, 
+            "D F": 0, "D U": 0.5, "D D": 1, "D Bd": 2.5, "D Bu": 2.5, 
+            "Bd F": 2.5, "Bd U": 2.5, "Bd D": 2.5, "Bd Bd": 3.5, "Bd Bu": 3.5, 
+            "Bu F": 2.5, "Bu U": 2.5, "Bu D": 2.5, "Bu Bd": 3.5, "Bu Bu": 3.5,
         },
         fingertrick: {
             "right_index": 0,
@@ -41,12 +41,13 @@ export class ScrambleOptimizer {
         }
     }   
 
-    constructor(config) {
+    constructor(config, callback) {
         this.config = config;
         this.minScramble = scramble;
         this.minCost = Infinity;
         this.iterations = 0;
         this.distribution = null;
+        this.callback = callback;
     }
 
     static wideReplace(moves, index) {
@@ -94,7 +95,7 @@ export class ScrambleOptimizer {
         if (transition.regrip) added += this.config.regrip;
         added += this.config.grip[transition.next];
         added += this.config.fingertrick[transition.type];
-        added += this.config.alpha[move.alpha];
+        added += this.config.alpha[move.alpha]; //TODO configure wide alpha seperately
         if(move.isWide) added += this.config.wide;
         if(move.isDouble) added += this.config.double;
         return added;
@@ -107,7 +108,7 @@ export class ScrambleOptimizer {
         if (this.iterations > this.maxIterations) {
             return;
         }
-        if(currentCost > this.bestCost+this.depth) {
+        if(this.pruneRotations && currentCost > this.bestCost+this.depth) {
             return;
         }
         if(currentCost > this.minCost+this.depth) {
@@ -121,7 +122,7 @@ export class ScrambleOptimizer {
                 this.minScramble = ScrambleOptimizer.copyScramble(moves);
                 //console.log("New best found:", currentCost, moves.map(m => m.toString()).join(" "));
             }
-            this.distribution[currentCost*2] += 1; //TODO
+            this.distribution[currentCost*2] += 1; //TODO need to not do this hack
             //if (currentCost === 0) zeros++;
             return;
         }
@@ -183,19 +184,20 @@ export class ScrambleOptimizer {
         }
     }
 
-    optimize(scramble, depth, maxIterations) {
+    async optimize(scramble, depth, maxIterations, pruneRotations) {
         const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
         const front_rotations = ["", "y", "y2", "y'"];
 
         this.depth = depth;
         this.maxIterations = maxIterations;
 
-        this.bestRotation = null;
+        this.bestRotation = {top: null, front: null};
         this.bestCost = Infinity;
         this.bestScramble = scramble;
-        this.distribution = new Array(300).fill(0);
+        this.distribution = new Array(400).fill(0); 
+        this.pruneRotations = pruneRotations;
+        this.rotationInfo = [];
 
-        // TODO move this into bruteforce so that we can prune early
         for (const top_rot of top_rotations) {
             for(const front_rot of front_rotations) {
 
@@ -218,14 +220,22 @@ export class ScrambleOptimizer {
 
                 this.bruteforceOptimize(rotatedScramble);
 
-                console.log(`Rotation ${top_rot} ${front_rot}: cost=${this.minCost}`);
-                console.log("Iterations:", this.iterations);
+                this.rotationInfo.push({ // TODO know the max index that was reached?
+                    rotation: {top: top_rot, front: front_rot}, 
+                    cost: this.minCost, 
+                    iterations: this.iterations,
+                    maxed: this.iterations > this.maxIterations,
+                });
 
+                
                 if (this.minCost < this.bestCost) {
                     this.bestCost = this.minCost;
                     this.bestScramble = ScrambleOptimizer.copyScramble(this.minScramble);
                     this.bestRotation = {top: top_rot, front: front_rot};
                 }
+
+                if(this.callback)
+                    await this.callback();
             }
         }
     }
@@ -270,11 +280,12 @@ export class ScrambleOptimizer {
     getBestAsString() {
         if(!this.bestScramble)
             return "";
+        const scramble = ScrambleOptimizer.copyScramble(this.bestScramble);
         if(this.bestRotation.front)
-            this.bestScramble.unshift(Move.fromString(this.bestRotation.front));
+            scramble.unshift(Move.fromString(this.bestRotation.front));
         if(this.bestRotation.top)
-            this.bestScramble.unshift(Move.fromString(this.bestRotation.top));
+            scramble.unshift(Move.fromString(this.bestRotation.top));
 
-        return ScrambleOptimizer.getScrambleString(this.bestScramble);
+        return ScrambleOptimizer.getScrambleString(scramble);
     }
 }

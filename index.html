@@ -9,25 +9,33 @@
 <div class="container">
     <div class="left-section">
         <h2>Scramble</h2>
-        <input type="text" id="scramble" placeholder="Enter scramble" value="B' D' L F R B R D R U F2 L2 B2 U' L2 D2 F2 D L2 U'", style="width: 350px;"/>
-        <input type="number" id="depth" placeholder="" value="0"/>
+        <div>
+          <label>Scramble
+            <input type="text" id="scramble" placeholder="Enter scramble" value="B' D' L F R B R D R U F2 L2 B2 U' L2 D2 F2 D L2 U'", style="width: 350px;"/>
+          </label>
+          
+          <label>Pruning Threshold
+            <input type="number" id="depth" placeholder="" value="0"/>
+          </label>
+
+          <label>Max Iterations
+            <input type="number" id="iterations" placeholder="" value="999999"/>
+          </label>
+
+          <label>Prune Rotations
+            <input type="checkbox" id="pruneRotations" checked/>
+          </label>
+          
+        </div>
+
         <button id="submitButton">Submit</button>
         <div>
             <textarea id="output" rows="3" cols="30" style="font-size: 2rem;" readonly></textarea>
         </div>
+
         <h3>Cost Distribution</h3>
         <div id="myChart" style="width:600px;height:400px;"></div>
-    </div>
-    <div class="middle-section">
-        <h2>Breakdown</h2>
-        <table id="costTable">
-          <thead>
-            <tr><th>Move</th><th>Next Grip</th><th>Fingertrick</th><th>Cost</th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-    </div>
-    <div class="right-section">   
+
         <form id="costForm" class="cost-form">
           <h2>Cost Configuration</h2>
           <div class="section">
@@ -53,6 +61,26 @@
       
           
         </form>
+
+    </div>
+    <div class="middle-section">
+        <h2>Rotations</h2>
+        <table id="rotationTable">
+          <thead>
+            <tr><th>Rotation</th><th>Iterations</th><th>Best Cost</th>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+    </div>
+    <div class="right-section">   
+        <h2>Breakdown</h2>
+        <table id="costTable">
+          <thead>
+            <tr><th>Move</th><th>Next Grip</th><th>Fingertrick</th><th>Cost</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
     </div>
 
 </div>

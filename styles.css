@@ -3,14 +3,13 @@
 }
 .container {
   font-family: sans-serif;
-  font-size: 24px;
+  font-size: 20px;
   display: flex;
 }
 .left-section,
 .middle-section {
   flex: 1;
   padding: 20px;
-  font-size: 20px;
 }
 .right-section {
   flex: 2;
