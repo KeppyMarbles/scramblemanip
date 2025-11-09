@@ -29,6 +29,7 @@ async function onSubmit(newConfig) {
 
 async function clearCharts() {
   updateChart([]);
+  updateIndexChart([]);
   renderRotationInfoTable([]);
   renderCostTable([]);
   document.getElementById("output").value = "";
@@ -37,10 +38,29 @@ async function clearCharts() {
 
 async function onRotationDone() {
   updateChart(optimizer.distribution);
+  updateIndexChart(optimizer.indexDistribution);
   renderRotationInfoTable(optimizer.rotationInfo);
   document.getElementById("output").value = optimizer.getBestAsString();
   renderCostTable(optimizer.analyzeBest());
   await new Promise(requestAnimationFrame);
+}
+
+function updateIndexChart(distribution) {
+  const chartDiv = document.getElementById("myChart2");
+    const data = [{
+        x: [...Array(distribution.length).keys()],
+        y: distribution,
+        type: 'bar'
+    }];
+    const layout = {
+        xaxis: {
+            title: "Move Index",
+        },
+        yaxis: {
+            title: "Cumulative Cost"
+        }
+    };
+    Plotly.newPlot(chartDiv, data, layout);
 }
 
 function updateChart(distribution) {

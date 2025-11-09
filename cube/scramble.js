@@ -126,18 +126,8 @@ export class ScrambleOptimizer {
             //if (currentCost === 0) zeros++;
             return;
         }
-        
 
         const move = moves[index];
-        const moveKey = move.toKey();
-        let transition = this.getTransitionFor(currentGrip, moveKey);
-
-        if (!transition) {
-            //currentGrip = "start";
-            //transition = getTransitionFor(currentGrip, moveKey);
-            // No valid transition defined; treat as costly and prune
-            return;
-        }
 
         this.iterations++;
 
@@ -149,10 +139,13 @@ export class ScrambleOptimizer {
             const moved = clone[index];
             const movedKey = moved.toKey();
             const t2 = inst.getTransitionFor(currentGrip, movedKey);
-            if (!t2) return; // invalid branch
+            if (!t2) {
+                //console.error("invalid branch", currentGrip, movedKey);
+                return;
+            }
             const added2 = inst.computeTransitionCost(t2, moved);
             const newCost2 = currentCost + added2;
-            //if (newCost2 > inst.minCost+inst.depth) return; // prune
+            inst.indexDistribution[index] += added2;
             inst.bruteforceOptimize(clone, index + skip, t2.next, newCost2);
         }
 
@@ -195,6 +188,7 @@ export class ScrambleOptimizer {
         this.bestCost = Infinity;
         this.bestScramble = scramble;
         this.distribution = new Array(400).fill(0); 
+        this.indexDistribution = new Array(scramble.length).fill(0);
         this.pruneRotations = pruneRotations;
         this.rotationInfo = [];
 

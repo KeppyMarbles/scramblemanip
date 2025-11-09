@@ -212,6 +212,11 @@ export const gripTransitions = {
       "type": "right_index_middle",
       "regrip": false
     },
+    "U2'": {
+      "next": "F F",
+      "type": "left_index_middle",
+      "regrip": false
+    },
     "U'": {
       "next": "F F",
       "type": "left_index",
