@@ -129,7 +129,7 @@ function renderRotationInfoTable(info) {
   for (const row of info) { //TODO sort by best cost
     total += row.iterations;
     const tr = document.createElement("tr");
-    const color = costToColor(row.cost, 50, -10);
+    const color = costToColor(row.cost, 80, -20); //TODO set this based on average costs?
     tr.innerHTML = `
       <td>${row.rotation.top} ${row.rotation.front}</td>
       <td>${row.iterations}</td>

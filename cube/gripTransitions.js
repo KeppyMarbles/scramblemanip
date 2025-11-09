@@ -1650,7 +1650,7 @@ export const gripTransitions = {
     },
     "F": {
       "next": "D F",
-      "type": "right_index",
+      "type": "right_index_push",
       "regrip": false
     },
     "F2": {

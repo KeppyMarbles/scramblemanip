@@ -136,17 +136,23 @@ export class ScrambleOptimizer {
             if(mutFn)
               mutFn(clone, index); 
             // compute transition for clone[index] against the same currentGrip
-            const moved = clone[index];
-            const movedKey = moved.toKey();
-            const t2 = inst.getTransitionFor(currentGrip, movedKey);
-            if (!t2) {
-                //console.error("invalid branch", currentGrip, movedKey);
-                return;
+            let cost = currentCost;
+            let grip = currentGrip;
+            for(let i = 0; i < skip; i++) {
+                const moved = clone[index+i];
+                const movedKey = moved.toKey();
+                const transition = inst.getTransitionFor(grip, movedKey);
+                if (!transition) {
+                    //console.error("invalid branch", currentGrip, movedKey);
+                    return;
+                }
+                cost += inst.computeTransitionCost(transition, moved);
+                grip = transition.next;
+                //const newCost2 = currentCost + added2;
+                //inst.indexDistribution[index] += added2;
             }
-            const added2 = inst.computeTransitionCost(t2, moved);
-            const newCost2 = currentCost + added2;
-            inst.indexDistribution[index] += added2;
-            inst.bruteforceOptimize(clone, index + skip, t2.next, newCost2);
+
+            inst.bruteforceOptimize(clone, index + skip, grip, cost);
         }
 
         branchWithClone(this, null);
@@ -161,11 +167,11 @@ export class ScrambleOptimizer {
             branchWithClone(this, (arr, idx) => ScrambleOptimizer.primeReplace(arr, idx), 1);
         }
 
-        // wideReplaceDouble (insert a new move equivalent for wide double)
-        //f (move.isDouble && !move.isRotation) {
-        //   // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
-        //   branchWithClone((arr, idx) => wideReplaceDouble(arr, idx), 2);
-        //
+         //wideReplaceDouble (insert a new move equivalent for wide double)
+        if (move.isDouble && !move.isRotation) {
+           // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
+           branchWithClone(this, (arr, idx) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx), 2);
+        }
 
         // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
         if (move.isDouble && !move.isRotation && !move.isWide) {
@@ -173,7 +179,8 @@ export class ScrambleOptimizer {
             branchWithClone(this, (arr, idx) => { ScrambleOptimizer.primeReplace(arr, idx); ScrambleOptimizer.wideReplace(arr, idx); }, 1);
 
             // prime + wideReplaceDouble
-            //branchWithClone((arr, idx) => { primeReplace(arr, idx); wideReplaceDouble(arr, idx); }, 2);
+            if(!move.isPrime)
+                branchWithClone(this, (arr, idx) => { ScrambleOptimizer.primeReplace(arr, idx); ScrambleOptimizer.wideReplaceDouble(arr, idx); }, 2);
         }
     }
 
