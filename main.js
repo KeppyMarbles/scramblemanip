@@ -4,24 +4,18 @@ import { ScrambleOptimizer } from "./cube/scramble.js";
 var optimizer;
 
 async function onSubmit(newConfig) {
-    
-    //document.getElementById("breakdown").value = "";
     // TODO catch syntax errors
     const scramble = ScrambleOptimizer.getScramble(document.getElementById("scramble").value);
-
 
     const depth = parseFloat(document.getElementById("depth").value);
     const iterations = parseFloat(document.getElementById("iterations").value);
     const pruneRotations = document.getElementById("pruneRotations").checked;
 
-
-    //Plotly.newPlot(document.getElementById("myChart"));
     await clearCharts();
 
     optimizer = new ScrambleOptimizer(newConfig, onRotationDone);
 
     console.time("optimizeTimer");
-    //const result = optimizer.optimize(scramble, depth, 10000);
     await optimizer.optimize(scramble, depth, iterations, pruneRotations);
     console.timeEnd("optimizeTimer");
 
@@ -29,7 +23,6 @@ async function onSubmit(newConfig) {
 
 async function clearCharts() {
   updateChart([]);
-  updateIndexChart([]);
   renderRotationInfoTable([]);
   renderCostTable([]);
   document.getElementById("output").value = "";
@@ -38,47 +31,28 @@ async function clearCharts() {
 
 async function onRotationDone() {
   updateChart(optimizer.distribution);
-  updateIndexChart(optimizer.indexDistribution);
   renderRotationInfoTable(optimizer.rotationInfo);
   document.getElementById("output").value = optimizer.getBestAsString();
   renderCostTable(optimizer.analyzeBest());
   await new Promise(requestAnimationFrame);
 }
 
-function updateIndexChart(distribution) {
-  const chartDiv = document.getElementById("myChart2");
-    const data = [{
-        x: [...Array(distribution.length).keys()],
-        y: distribution,
-        type: 'bar'
-    }];
-    const layout = {
-        xaxis: {
-            title: "Move Index",
-        },
-        yaxis: {
-            title: "Cumulative Cost"
-        }
-    };
-    Plotly.newPlot(chartDiv, data, layout);
-}
-
 function updateChart(distribution) {
-
-    const chartDiv = document.getElementById("myChart");
-    let maxIndex = 0;
-    for(let i = distribution.length-1; i >= 0; i--) {
-      if(distribution[i] != 0) {
-        maxIndex = i;
-        break;
-      }
-    }
+    const costs = Array.from(distribution.keys()).sort((a, b) => a - b);
+    const counts = costs.map(c => distribution.get(c));
     const data = [{
-        x: [...Array(maxIndex+10).keys()],
-        y: distribution,
-        type: 'bar'
+        x: costs,
+        y: counts,
+        type: 'bar',
     }];
     const layout = {
+        margin: {
+          l: 50, // left margin in pixels
+          r: 50, // right margin in pixels
+          b: 50, // bottom margin in pixels
+          t: 10, // top margin in pixels
+          pad: 4 // padding between the plot and the margin in pixels
+        },
         xaxis: {
             title: "Scrambles Found",
         },
@@ -86,7 +60,22 @@ function updateChart(distribution) {
             title: "Scramble Cost"
         }
     };
-    Plotly.newPlot(chartDiv, data, layout);
+
+    const samples =  Array.from(distribution.values()).reduce((a, b) => a + b, 0);
+    const mean =     Array.from(distribution.entries()).reduce((sum, [cost, count]) => sum + cost * count, 0) / samples;
+    const variance = Array.from(distribution.entries()).reduce((sum, [cost, count]) => sum + count * Math.pow(cost - mean, 2), 0) / samples;
+    const stdDev = Math.sqrt(variance);
+    const skewness = Array.from(distribution.entries()).reduce((sum, [cost, count]) => sum + count * Math.pow((cost - mean) / stdDev, 3), 0) / samples;
+
+    const minCost = Math.min(...distribution.keys());
+    const zScore = (minCost - mean) / stdDev;
+
+    Plotly.newPlot(document.getElementById("myChart"), data, layout);
+    document.getElementById("samples").textContent = samples;
+    document.getElementById("averageCost").textContent = mean.toFixed(3);
+    document.getElementById("standardDeviation").textContent = stdDev.toFixed(3);
+    document.getElementById("skewness").textContent = skewness.toFixed(3);
+    document.getElementById("minZ").textContent = zScore.toFixed(3);
 }
 
 function costToColor(cost, maxAbsCost, shift) {
@@ -132,7 +121,7 @@ function renderRotationInfoTable(info) {
     const color = costToColor(row.cost, 80, -20); //TODO set this based on average costs?
     tr.innerHTML = `
       <td>${row.rotation.top} ${row.rotation.front}</td>
-      <td>${row.iterations}</td>
+      <td style=${row.maxed ? `background:#ff0000` : ""}>${row.iterations}</td>
       <td style="background:${color};text-align:right">${row.cost}</td>
     `;
     tbody.appendChild(tr);

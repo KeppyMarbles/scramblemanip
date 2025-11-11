@@ -34,19 +34,25 @@
         </div>
 
         <h3>Cost Distribution</h3>
-        <div id="myChart" style="width:600px;height:400px;"></div>
-        <div id="myChart2" style="width:600px;height:400px;"></div>
+        <div id="myChart" style="width:600px;height:300px;"></div>
+
+        <table class="stats-table">
+          <tr><th>Total Samples</th><td id="samples"></td></tr>
+          <tr><th>Average Cost</th><td id="averageCost"></td></tr>
+          <tr><th>Standard Deviation</th><td id="standardDeviation"></td></tr>
+          <tr><th>Skewness</th><td id="skewness"></td></tr>
+          <tr><th>Min Z-Score</th><td id="minZ"></td></tr>
+        </table>
 
         <form id="costForm" class="cost-form">
           <h2>Cost Configuration</h2>
           <div class="section">
             <label>Regrip <input type="number" step="0.5" name="regrip"></label><br>
-            <label>Wide <input type="number" step="0.5" name="wide"></label><br>
             <label>Double <input type="number" step="0.5" name="double"></label><br>
           </div>
       
           <h3>Face</h3>
-          <div class="section" data-group="alpha">
+          <div class="section grid face" data-group="alpha">
             <!-- generated dynamically -->
           </div>
       
@@ -66,7 +72,7 @@
     </div>
     <div class="middle-section">
         <h2>Rotations</h2>
-        <table id="rotationTable">
+        <table class="breakdown-table" id="rotationTable">
           <thead>
             <tr><th>Rotation</th><th>Iterations</th><th>Best Cost</th>
           </thead>
@@ -76,7 +82,7 @@
     </div>
     <div class="right-section">   
         <h2>Breakdown</h2>
-        <table id="costTable">
+        <table class="breakdown-table" id="costTable">
           <thead>
             <tr><th>Move</th><th>Next Grip</th><th>Fingertrick</th><th>Cost</th></tr>
           </thead>

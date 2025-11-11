@@ -5,10 +5,10 @@ export class ScrambleOptimizer {
     static transitions = gripTransitions;
     static defaultCostConfiguration = {
         regrip: 10,
-        wide: 1,
         double: 0,
         alpha: {
             "F": 0.5, "B": 3.5, "R": 0, "L": 2, "U": 0, "D": 2.5,
+            "f": 1.5, "b": 4, "r": 0.5, "l": 2.5, "u": 1.5, "d": 3.5,
         },
         grip: {
             "F F": 0, "F U": 0, "F D": 0, "F Bd": 2.5, "F Bu": 2.5, 
@@ -85,6 +85,11 @@ export class ScrambleOptimizer {
         return scramble.map(m => m.toString()).join(" ");
     }
 
+    recordCost(cost) {
+        const rounded = Math.round(cost * 2) / 2;
+        this.distribution.set(rounded, (this.distribution.get(rounded) || 0) + 1);
+    }
+
     getTransitionFor(grip, moveKey) { //TODO needed?
         return ScrambleOptimizer.transitions[grip]?.[moveKey];
     }
@@ -95,8 +100,7 @@ export class ScrambleOptimizer {
         if (transition.regrip) added += this.config.regrip;
         added += this.config.grip[transition.next];
         added += this.config.fingertrick[transition.type];
-        added += this.config.alpha[move.alpha]; //TODO configure wide alpha seperately
-        if(move.isWide) added += this.config.wide;
+        added += this.config.alpha[move.isWide ? move.alpha.toLowerCase() : move.alpha];
         if(move.isDouble) added += this.config.double;
         return added;
     }
@@ -116,26 +120,19 @@ export class ScrambleOptimizer {
         }
 
         if (index >= moves.length) {
-            
             if (currentCost < this.minCost) {
                 this.minCost = currentCost;
                 this.minScramble = ScrambleOptimizer.copyScramble(moves);
-                //console.log("New best found:", currentCost, moves.map(m => m.toString()).join(" "));
             }
-            this.distribution[currentCost*2] += 1; //TODO need to not do this hack
-            //if (currentCost === 0) zeros++;
+            this.recordCost(currentCost);
             return;
         }
-
-        const move = moves[index];
-
-        this.iterations++;
 
         function branchWithClone(inst, mutFn, skip = 1) {
             const clone = ScrambleOptimizer.copyScramble(moves);
             if(mutFn)
-              mutFn(clone, index); 
-            // compute transition for clone[index] against the same currentGrip
+              mutFn(clone, index);
+
             let cost = currentCost;
             let grip = currentGrip;
             for(let i = 0; i < skip; i++) {
@@ -148,12 +145,13 @@ export class ScrambleOptimizer {
                 }
                 cost += inst.computeTransitionCost(transition, moved);
                 grip = transition.next;
-                //const newCost2 = currentCost + added2;
-                //inst.indexDistribution[index] += added2;
             }
 
             inst.bruteforceOptimize(clone, index + skip, grip, cost);
         }
+
+        const move = moves[index];
+        this.iterations++;
 
         branchWithClone(this, null);
 
@@ -194,8 +192,7 @@ export class ScrambleOptimizer {
         this.bestRotation = {top: null, front: null};
         this.bestCost = Infinity;
         this.bestScramble = scramble;
-        this.distribution = new Array(400).fill(0); 
-        this.indexDistribution = new Array(scramble.length).fill(0);
+        this.distribution = new Map();
         this.pruneRotations = pruneRotations;
         this.rotationInfo = [];
 

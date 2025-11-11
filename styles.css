@@ -21,6 +21,11 @@
   padding: 8px;
   margin-bottom: 12px;
 }
+.section.grid.face {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 4px;
+}
 .section.grid.grip {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -28,7 +33,7 @@
 }
 .section.grid.fingertricks {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 4px;
 }
 label {
@@ -43,4 +48,31 @@ input {
 h2 {
   margin-top: 16px;
   border-bottom: 1px solid #aaa;
+}
+.breakdown-table {
+  font-size: 18px;
+  width: 300px;
+  border-collapse: collapse;
+}
+.breakdown-table th {
+  text-align: left;
+  padding: 4px 8px;
+}
+.breakdown-table td {
+  text-align: left;
+  padding: 4px 8px;
+}
+
+.stats-table {
+  font-size: 15px;
+  width: 600px;
+  border-collapse: collapse;
+}
+.stats-table th {
+  text-align: left;
+  padding: 4px 8px;
+}
+.stats-table td {
+  text-align: right;
+  padding: 4px 8px;
 }
