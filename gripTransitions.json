@@ -1,4 +1,4 @@
-export const gripTransitions = {
+{
   "start": {
     "B": {
       "next": "D F",
@@ -223,9 +223,6 @@ export const gripTransitions = {
       "regrip": false
     },
     "F": {
-      //"next": "F F",
-      //"type": "left_thumb",
-      //"regrip": false
       "next": "F D",
       "type": "right_index",
       "regrip": true
@@ -241,9 +238,6 @@ export const gripTransitions = {
       "regrip": true
     },
     "F'": {
-      //"next": "F F",
-      //"type": "right_thumb",
-      //"regrip": false
       "next": "D F",
       "type": "left_index",
       "regrip": true
@@ -1566,7 +1560,7 @@ export const gripTransitions = {
     "B'": {
       "next": "D D",
       "type": "right_ring",
-      "regrip": true,
+      "regrip": true
     },
     "D": {
       "next": "D F",

@@ -1,8 +1,6 @@
 import { Move } from "./move.js";
-import { gripTransitions } from "./gripTransitions.js";
 
 export class ScrambleOptimizer {
-    static transitions = gripTransitions;
     static defaultCostConfiguration = {
         regrip: 10,
         double: 0,
@@ -41,13 +39,14 @@ export class ScrambleOptimizer {
         }
     }   
 
-    constructor(config, callback) {
+    constructor(config, transitions, callback) {
         this.config = config;
         this.minScramble = scramble;
         this.minCost = Infinity;
         this.iterations = 0;
         this.distribution = null;
         this.callback = callback;
+        this.transitions = transitions;
     }
 
     static wideReplace(moves, index) {
@@ -91,7 +90,7 @@ export class ScrambleOptimizer {
     }
 
     getTransitionFor(grip, moveKey) { //TODO needed?
-        return ScrambleOptimizer.transitions[grip]?.[moveKey];
+        return this.transitions[grip]?.[moveKey];
     }
 
     computeTransitionCost(transition, move) { //TODO should probably have a better prevention of NaNs
@@ -249,17 +248,14 @@ export class ScrambleOptimizer {
 
             const transition = this.getTransitionFor(currentGrip, moveKey);
             if (!transition) {
-                break; // stop early if invalid
+                break;
             }
 
             const nextGrip = transition.next;
             const added = this.computeTransitionCost(transition, move);
-            //console.log("added", added)
 
             breakdown.push({
                 move: move.toString(),
-                grip: currentGrip,
-                next: nextGrip,
                 transition,
                 addedCost: added,
             });

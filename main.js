@@ -1,5 +1,6 @@
 import { setupCostForm } from "./ui/form.js";
 import { ScrambleOptimizer } from "./cube/scramble.js";
+import gripTransitions from './gripTransitions.json' with { type: 'json' };
 
 var optimizer;
 
@@ -13,7 +14,7 @@ async function onSubmit(newConfig) {
 
     await clearCharts();
 
-    optimizer = new ScrambleOptimizer(newConfig, onRotationDone);
+    optimizer = new ScrambleOptimizer(newConfig, gripTransitions, onRotationDone);
 
     console.time("optimizeTimer");
     await optimizer.optimize(scramble, depth, iterations, pruneRotations);
