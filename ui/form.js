@@ -44,4 +44,8 @@ export function setupCostForm(initialConfig, onUpdate) {
 
         onUpdate(newConfig);
     });
+
+    document.getElementById("resetButton").addEventListener("click", (e) => {
+        //TODO
+    });
 }

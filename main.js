@@ -5,8 +5,16 @@ import gripTransitions from './gripTransitions.json' with { type: 'json' };
 var optimizer;
 
 async function onSubmit(newConfig) {
-    // TODO catch syntax errors
-    const scramble = ScrambleOptimizer.getScramble(document.getElementById("scramble").value);
+    saveCostConfig(newConfig);
+
+    document.getElementById("errorMessage").textContent = "";
+    let scramble;
+    try {
+      scramble = ScrambleOptimizer.getScramble(document.getElementById("scramble").value.trim());
+    }
+    catch(e) {
+      document.getElementById("errorMessage").textContent = "Error: " + e.message;
+    }
 
     const depth = parseFloat(document.getElementById("depth").value);
     const iterations = parseFloat(document.getElementById("iterations").value);
@@ -26,14 +34,14 @@ async function clearCharts() {
   updateChart([]);
   renderRotationInfoTable([]);
   renderCostTable([]);
-  document.getElementById("output").value = "";
+  document.getElementById("output").textContent = "";
   await new Promise(requestAnimationFrame);
 }
 
 async function onRotationDone() {
   updateChart(optimizer.distribution);
   renderRotationInfoTable(optimizer.rotationInfo);
-  document.getElementById("output").value = optimizer.getBestAsString();
+  document.getElementById("output").textContent = optimizer.getBestAsString();
   renderCostTable(optimizer.analyzeBest());
   await new Promise(requestAnimationFrame);
 }
@@ -48,11 +56,11 @@ function updateChart(distribution) {
     }];
     const layout = {
         margin: {
-          l: 50, // left margin in pixels
-          r: 50, // right margin in pixels
-          b: 50, // bottom margin in pixels
-          t: 10, // top margin in pixels
-          pad: 4 // padding between the plot and the margin in pixels
+          l: 50,
+          r: 50,
+          b: 50,
+          t: 10,
+          pad: 4
         },
         xaxis: {
             title: "Scrambles Found",
@@ -133,4 +141,20 @@ function renderRotationInfoTable(info) {
   tbody.appendChild(totalRow);
 }
 
-setupCostForm(ScrambleOptimizer.defaultCostConfiguration, onSubmit);
+function loadCostConfig() {
+  try {
+    const stored = localStorage.getItem("costConfig");
+    return stored ? JSON.parse(stored) : null;
+  } 
+  catch {
+    return null;
+  }
+}
+
+function saveCostConfig(config) {
+  localStorage.setItem("costConfig", JSON.stringify(config));
+}
+
+let costConfig = loadCostConfig() || ScrambleOptimizer.defaultCostConfiguration;
+
+setupCostForm(costConfig, onSubmit);
