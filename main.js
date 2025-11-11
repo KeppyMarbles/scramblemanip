@@ -13,7 +13,7 @@ async function onSubmit({ config, options }) {
     optimizer = new ScrambleOptimizer(config, gripTransitions, onRotationDone);
 
     console.time("optimizeTimer");
-    await optimizer.optimize(options.scramble, options.depth, options.iterations, options.pruneRotations, options.memoize);
+    await optimizer.optimize(options.scramble, options.depth, options.iterations, options.pruneRotations, options.memoize, options.wideReplaceDouble);
     console.timeEnd("optimizeTimer");
 }
 

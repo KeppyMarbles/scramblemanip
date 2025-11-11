@@ -110,9 +110,10 @@ export class ScrambleOptimizer {
 
     bruteforceOptimize(moves, index = 0, currentGrip = "start", currentCost = 0, orientation = {up: "U", front: "F"}) {
         if(this.memoize) {
-            //const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}|${moves.length}`;
-            const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}`;
-            if (this.memo[key] <= currentCost) 
+            const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}|${moves.length}`;
+            //const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}`;
+            const oldBest = this.memo[key] ?? Infinity;
+            if (this.memo[key]+this.depth <= currentCost) 
                 return;
             this.memo[key] = currentCost;
         }
@@ -164,36 +165,38 @@ export class ScrambleOptimizer {
         const move = moves[index];
         this.iterations++;
 
-        branchWithClone(this, null);
+        branchWithClone(this, null, 1);
+
+        if(move.isRotation)
+            return;
 
         // wide variation (single-layer wide)
-        if (!move.isWide && !move.isRotation) {
+        if (!move.isWide) {
             branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.wideReplace(arr, idx, or), 1);
         }
 
         // prime variation for double (turn R2 into R2' variant)
-        if (move.isDouble && !move.isPrime && !move.isRotation) {
-            branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.primeReplace(arr, idx, or), 1);
-        }
+        if(move.isDouble) { 
+            if (!move.isPrime) {
+                branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.primeReplace(arr, idx, or), 1);
+            }
+            // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
+            if (!move.isWide) {
+                // prime + wide (prime then wideReplace)
+                branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplace(arr, idx, or); }, 1);
 
-        //wideReplaceDouble (change double move into 1 face move and 1 wide move)
-        //if (move.isDouble && !move.isRotation) {
-        //   // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
-        //   branchWithClone(this, (arr, idx, or) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx, or), 2);
-        //}
-
-        // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
-        if (move.isDouble && !move.isRotation && !move.isWide) {
-            // prime + wide (prime then wideReplace)
-            branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplace(arr, idx, or); }, 1);
-
-            // prime + wideReplaceDouble
-            //if(!move.isPrime)
-            //    branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplaceDouble(arr, idx, or); }, 2);
+                if(this.doWideReplaceDouble) {
+                    // wideReplaceDouble (change double move into 1 face move and 1 wide move)
+                    // inserts an extra move at index (length increases) so skip=2
+                    branchWithClone(this, (arr, idx, or) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx, or), 2);
+                    if(!move.isPrime)
+                        branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplaceDouble(arr, idx, or); }, 2);
+                }
+            }
         }
     }
 
-    async optimize(scramble, depth, maxIterations, pruneRotations, memoize) {
+    async optimize(scramble, depth, maxIterations=999999, pruneRotations=true, memoize=true, doWideReplaceDouble=false) {
         const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
         const front_rotations = ["", "y", "y2", "y'"];
 
@@ -206,6 +209,7 @@ export class ScrambleOptimizer {
         this.distribution = new Map();
         this.pruneRotations = pruneRotations;
         this.memoize = memoize;
+        this.doWideReplaceDouble = doWideReplaceDouble;
         this.rotationInfo = [];
         this.memo = new Map();
 

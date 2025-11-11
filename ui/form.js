@@ -70,12 +70,13 @@ function collectRunOptions() {
   const iterations = parseFloat(document.getElementById("iterations").value);
   const pruneRotations = document.getElementById("pruneRotations").checked;
   const memoize = document.getElementById("memoize").checked;
+  const wideReplaceDouble = document.getElementById("wideReplaceDouble").checked;
 
   if (Number.isNaN(depth) || Number.isNaN(iterations)) {
     throw new Error("Depth and iterations must be numbers");
   }
 
-  return { scramble, depth, iterations, pruneRotations, memoize };
+  return { scramble, depth, iterations, pruneRotations, memoize, wideReplaceDouble };
 }
 
 function applyConfig(form, config) {
