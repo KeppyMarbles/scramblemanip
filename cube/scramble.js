@@ -76,7 +76,7 @@ export class ScrambleOptimizer {
         return moves.map(move=>new Move(move.alpha, move.isPrime, move.isDouble, move.isRotation, move.isWide, move.sliceNum));
     }
 
-    static getScramble(string) {
+    static parseScramble(string) {
         return string.split(" ").map(Move.fromString);
     }
 
