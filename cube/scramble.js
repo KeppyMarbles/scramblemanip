@@ -49,20 +49,22 @@ export class ScrambleOptimizer {
         this.transitions = transitions;
     }
 
-    static wideReplace(moves, index) {
+    static wideReplace(moves, index, orientation) {
         moves[index].alpha = Move.WIDE_EQUIVALENTS[moves[index].alpha]
         moves[index].isWide = true;
         let rotation = Move.WIDE_ROTATIONS[moves[index].toKey()];
         for(let i = index+1; i < moves.length; i++) {
             moves[i].transpose(rotation);
         }
+        orientation.up = Move.TRANSPOSITIONS[rotation][orientation.up];
+        orientation.front = Move.TRANSPOSITIONS[rotation][orientation.front];
     }
 
-    static primeReplace(moves, index) {
+    static primeReplace(moves, index, orientation) {
         moves[index].isPrime = true;
     }
 
-    static wideReplaceDouble(moves, index) {
+    static wideReplaceDouble(moves, index, orientation) {
         const newMove = new Move(Move.WIDE_EQUIVALENTS[moves[index].alpha], moves[index].isPrime, false, false, true);
         moves[index].isDouble = false;
         moves.splice(index, 0, newMove);
@@ -70,6 +72,8 @@ export class ScrambleOptimizer {
         for(let i = index+1; i < moves.length; i++) {
             moves[i].transpose(rotation);
         }
+        orientation.up = Move.TRANSPOSITIONS[rotation][orientation.up];
+        orientation.front = Move.TRANSPOSITIONS[rotation][orientation.front];
     }
 
     static copyScramble(moves) {
@@ -104,7 +108,14 @@ export class ScrambleOptimizer {
         return added;
     }
 
-    bruteforceOptimize(moves, index = 0, currentGrip = "start", currentCost = 0) {
+    bruteforceOptimize(moves, index = 0, currentGrip = "start", currentCost = 0, orientation = {up: "U", front: "F"}) {
+        if(this.memoize) {
+            //const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}|${moves.length}`;
+            const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}`;
+            if (this.memo[key] <= currentCost) 
+                return;
+            this.memo[key] = currentCost;
+        }
 
         // TODO maybe reset count if we're making progress?
 
@@ -129,8 +140,9 @@ export class ScrambleOptimizer {
 
         function branchWithClone(inst, mutFn, skip = 1) {
             const clone = ScrambleOptimizer.copyScramble(moves);
+            const newOrientation = {up: orientation.up, front: orientation.front};
             if(mutFn)
-              mutFn(clone, index);
+              mutFn(clone, index, newOrientation);
 
             let cost = currentCost;
             let grip = currentGrip;
@@ -146,7 +158,7 @@ export class ScrambleOptimizer {
                 grip = transition.next;
             }
 
-            inst.bruteforceOptimize(clone, index + skip, grip, cost);
+            inst.bruteforceOptimize(clone, index + skip, grip, cost, newOrientation);
         }
 
         const move = moves[index];
@@ -156,32 +168,32 @@ export class ScrambleOptimizer {
 
         // wide variation (single-layer wide)
         if (!move.isWide && !move.isRotation) {
-            branchWithClone(this, (arr, idx) => ScrambleOptimizer.wideReplace(arr, idx), 1);
+            branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.wideReplace(arr, idx, or), 1);
         }
 
-        // prime variation for double (turn R2 into R' variant)
+        // prime variation for double (turn R2 into R2' variant)
         if (move.isDouble && !move.isPrime && !move.isRotation) {
-            branchWithClone(this, (arr, idx) => ScrambleOptimizer.primeReplace(arr, idx), 1);
+            branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.primeReplace(arr, idx, or), 1);
         }
 
-         //wideReplaceDouble (insert a new move equivalent for wide double)
-        if (move.isDouble && !move.isRotation) {
-           // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
-           branchWithClone(this, (arr, idx) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx), 2);
-        }
+        //wideReplaceDouble (change double move into 1 face move and 1 wide move)
+        //if (move.isDouble && !move.isRotation) {
+        //   // wideReplaceDouble inserts an extra move at index (length increases) so skip=2
+        //   branchWithClone(this, (arr, idx, or) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx, or), 2);
+        //}
 
         // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
         if (move.isDouble && !move.isRotation && !move.isWide) {
             // prime + wide (prime then wideReplace)
-            branchWithClone(this, (arr, idx) => { ScrambleOptimizer.primeReplace(arr, idx); ScrambleOptimizer.wideReplace(arr, idx); }, 1);
+            branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplace(arr, idx, or); }, 1);
 
             // prime + wideReplaceDouble
-            if(!move.isPrime)
-                branchWithClone(this, (arr, idx) => { ScrambleOptimizer.primeReplace(arr, idx); ScrambleOptimizer.wideReplaceDouble(arr, idx); }, 2);
+            //if(!move.isPrime)
+            //    branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplaceDouble(arr, idx, or); }, 2);
         }
     }
 
-    async optimize(scramble, depth, maxIterations, pruneRotations) {
+    async optimize(scramble, depth, maxIterations, pruneRotations, memoize) {
         const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
         const front_rotations = ["", "y", "y2", "y'"];
 
@@ -193,29 +205,40 @@ export class ScrambleOptimizer {
         this.bestScramble = scramble;
         this.distribution = new Map();
         this.pruneRotations = pruneRotations;
+        this.memoize = memoize;
         this.rotationInfo = [];
+        this.memo = new Map();
+
+        const orientation = {up: "U", front: "F"};
 
         for (const top_rot of top_rotations) {
             for(const front_rot of front_rotations) {
 
                 const rotatedScramble = ScrambleOptimizer.copyScramble(scramble);
+                const newOrientation = {up: orientation.up, front: orientation.front};
                 // transpose all moves according to the starting rotation
                 if (top_rot !== "") {
                     for (const move of rotatedScramble) {
                         move.transpose(top_rot);
                     }
+                    newOrientation.up = Move.TRANSPOSITIONS[top_rot][newOrientation.up];
                 }
                 if (front_rot !== "") {
                     for (const move of rotatedScramble) {
                         move.transpose(front_rot);
                     }
+                    newOrientation.front = Move.TRANSPOSITIONS[front_rot][newOrientation.front];
                 }
 
                 this.minCost = Infinity;
                 this.minScramble = scramble;
                 this.iterations = 0;
-
+                //this.memo = new Map();
+            
+                
+                
                 this.bruteforceOptimize(rotatedScramble);
+                this.bruteforceOptimize(rotatedScramble, 0, "start", 0, newOrientation);
 
                 this.rotationInfo.push({ // TODO know the max index that was reached?
                     rotation: {top: top_rot, front: front_rot}, 
