@@ -1,40 +1,29 @@
 .cost-form {
-  max-width: 600px;
+  max-width: 400px;
 }
 .container {
-  font-family: sans-serif;
+  font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 20px;
   display: flex;
 }
-.left-section,
+.left-section {
+  max-width: 500px;
+  flex: 1;
+  padding: 20px;
+}
 .middle-section {
+  max-width: 400px;
   flex: 1;
   padding: 20px;
 }
 .right-section {
-  flex: 2;
+  max-width: 400px;
+  flex: 1;
   padding: 20px;
 }
-.section {
-  border: 1px solid #4442;
-  border-radius: 6px;
-  padding: 8px;
-  margin-bottom: 12px;
-}
-.section.grid.face {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 4px;
-}
-.section.grid.grip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 4px;
-}
-.section.grid.fingertricks {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 4px;
+.cost-section {
+  flex: 1;
+  padding: 20px;
 }
 label {
   display: flex;
@@ -50,7 +39,7 @@ h2 {
   border-bottom: 1px solid #aaa;
 }
 .breakdown-table {
-  font-size: 18px;
+  font-size: 15px;
   width: 300px;
   border-collapse: collapse;
 }
@@ -64,7 +53,7 @@ h2 {
 }
 .stats-table {
   font-size: 15px;
-  width: 600px;
+  width: 500px;
   border-collapse: collapse;
 }
 .stats-table th {
@@ -74,4 +63,37 @@ h2 {
 .stats-table td {
   text-align: right;
   padding: 4px 8px;
+}
+.section-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+.hidden {
+  display: none;
+}
+.tab-buttons {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 0.5rem;
+}
+.tab-buttons button {
+  flex: 1;
+  padding: 0.5rem;
+  background: #e3eeff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
+.tab-buttons button.active {
+  background: #cbdfff;
+  border-bottom: 2px solid #003399;
+}
+.tab-content {
+  display: none;
+}
+.tab-content.active {
+  display: block;
 }

@@ -196,20 +196,20 @@ export class ScrambleOptimizer {
         }
     }
 
-    async optimize(scramble, depth, maxIterations=999999, pruneRotations=true, memoize=true, doWideReplaceDouble=false) {
+    async optimize(options) {
         const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
         const front_rotations = ["", "y", "y2", "y'"];
 
-        this.depth = depth;
-        this.maxIterations = maxIterations;
+        this.depth = options.depth;
+        this.maxIterations = options.maxIterations;
 
         this.bestRotation = {top: null, front: null};
         this.bestCost = Infinity;
-        this.bestScramble = scramble;
+        this.bestScramble = options.scramble;
         this.distribution = new Map();
-        this.pruneRotations = pruneRotations;
-        this.memoize = memoize;
-        this.doWideReplaceDouble = doWideReplaceDouble;
+        this.pruneRotations = options.pruneRotations;
+        this.memoize = options.memoize;
+        this.doWideReplaceDouble = options.wideReplaceDouble;
         this.rotationInfo = [];
         this.memo = new Map();
 
@@ -218,7 +218,7 @@ export class ScrambleOptimizer {
         for (const top_rot of top_rotations) {
             for(const front_rot of front_rotations) {
 
-                const rotatedScramble = ScrambleOptimizer.copyScramble(scramble);
+                const rotatedScramble = ScrambleOptimizer.copyScramble(options.scramble);
                 const newOrientation = {up: orientation.up, front: orientation.front};
                 // transpose all moves according to the starting rotation
                 if (top_rot !== "") {
@@ -237,11 +237,7 @@ export class ScrambleOptimizer {
                 this.minCost = Infinity;
                 this.minScramble = scramble;
                 this.iterations = 0;
-                //this.memo = new Map();
             
-                
-                
-                this.bruteforceOptimize(rotatedScramble);
                 this.bruteforceOptimize(rotatedScramble, 0, "start", 0, newOrientation);
 
                 this.rotationInfo.push({ // TODO know the max index that was reached?
@@ -260,6 +256,9 @@ export class ScrambleOptimizer {
 
                 if(this.callback)
                     await this.callback();
+
+                if(!options.searchRotations)
+                    return;
             }
         }
     }

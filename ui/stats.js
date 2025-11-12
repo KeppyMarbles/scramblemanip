@@ -31,11 +31,13 @@ function drawDistributionChart(distribution) {
           pad: 4
         },
         xaxis: {
-            title: "Scrambles Found",
+            title: "Scramble Cost",
         },
         yaxis: {
-            title: "Scramble Cost"
-        }
+            title: "Scrambles Found"
+        },
+        paper_bgcolor: document.body.style.backgroundColor,
+        plot_bgcolor: document.body.style.backgroundColor
     };
 
     const samples =  Array.from(distribution.values()).reduce((a, b) => a + b, 0);
@@ -55,7 +57,7 @@ function drawDistributionChart(distribution) {
     document.getElementById("minZ").textContent = zScore.toFixed(3);
 }
 
-function costToColor(cost, maxAbsCost, shift) {
+export function costToColor(cost, maxAbsCost, shift) {
   cost += shift;
   const ratio = Math.max(-1, Math.min(1, cost / maxAbsCost));
   const hue = 60 - ratio * 60;
