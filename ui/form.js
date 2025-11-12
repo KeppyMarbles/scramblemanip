@@ -320,3 +320,7 @@ function applyConfig(form, config) {
   }
   updateCostInputColors(form);
 }
+
+export function drawSearchTime(time) {
+    document.getElementById("searchTime").textContent = new Date(time).toISOString().slice(11, -1)
+}

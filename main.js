@@ -1,4 +1,4 @@
-import { setupForm } from "./ui/form.js";
+import { setupForm, drawSearchTime } from "./ui/form.js";
 import { ScrambleOptimizer } from "./cube/scramble.js";
 import { drawOptimizerStats } from "./ui/stats.js";
 import gripTransitions from './gripTransitions.json' with { type: 'json' };
@@ -10,9 +10,11 @@ async function onSubmit({ config, options }) {
 
     optimizer = new ScrambleOptimizer(config, gripTransitions, onRotationDone);
 
-    console.time("optimizeTimer");
+    const start = performance.now();
     await optimizer.optimize(options);
-    console.timeEnd("optimizeTimer");
+    const end = performance.now();
+
+    drawSearchTime(end - start);
 }
 
 async function onRotationDone() {

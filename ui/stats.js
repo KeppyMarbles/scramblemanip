@@ -10,6 +10,7 @@ export async function drawOptimizerStats(optimizer) {
         drawRotationInfoTable([]);
         drawCostTable([]);
         document.getElementById("output").textContent = "";
+        document.getElementById("searchTime").innerHTML = "";
     }
     await new Promise(requestAnimationFrame);
 }
