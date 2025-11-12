@@ -10,9 +10,9 @@ A tool for generating more ergonomic versions of Rubik's cube scrambles. Current
  ### Current limitations
  - Unhelpful output for big cubes, since the grip transitions were made with 3x3 in mind.
  - Grip transitions were created using what I personally would do in the specific situation. There may be differences between my style and yours that causes inaccuracy in the predicted grip or fingertrick.
-  - The configuration file is very large, so changing it is probably not approachable for the end user.
+   - The configuration file is very large, so changing it is probably not approachable for the end user.
  - No "thumb" type fingertricks
  - Limited view of the hand state beyond thumb placement; sometimes the output contains moves that are good on paper but awkward in practice.
  - No analysis for rotations or slice moves yet.
  - Just a webpage at the momement, no extra tools or API.
-  - I'm new to web dev stuff so the site is pretty minimal.
+   - I'm new to web dev stuff so the site is pretty minimal.
