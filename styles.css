@@ -98,3 +98,15 @@ h2 {
 .tab-content.active {
   display: block;
 }
+.footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #d8e5ff;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  border-top: 1px solid #a0b8e0;
+  z-index: 1000;
+}
