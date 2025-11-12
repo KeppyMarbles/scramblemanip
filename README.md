@@ -14,3 +14,5 @@ A tool for generating more ergonomic versions of Rubik's cube scrambles. Current
  - No "thumb" type fingertricks
  - Limited view of the hand state beyond thumb placement; sometimes the output contains moves that are good on paper but awkward in practice.
  - No analysis for rotations or slice moves yet.
+ - Just a webpage at the momement, no extra tools or API.
+  - I'm new to web dev stuff so the site is pretty minimal.
