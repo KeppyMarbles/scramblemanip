@@ -120,7 +120,7 @@ export class Move {
         return move;
     }
 
-    toString() {
+    toString() { // TODO bool for replacing lowercase with slice count?
         let s = "";
         if (this.sliceNum > 2) s += this.sliceNum;
         s += (this.isWide || this.isRotation) ? this.alpha.toLowerCase() : this.alpha;
