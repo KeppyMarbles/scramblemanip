@@ -2,32 +2,51 @@ import { ScrambleOptimizer } from "../cube/scramble.js";
 import { costToColor } from "./stats.js";
 
 export function setupForm(onSubmit) {
-    const initialConfig = loadCostConfig() || ScrambleOptimizer.defaultCostConfiguration;
+    let initialConfig = loadCostConfig();
+    if(initialConfig)
+      initialConfig = migrateConfig(initialConfig, ScrambleOptimizer.defaultCostConfiguration);
+    else
+      initialConfig = ScrambleOptimizer.defaultCostConfiguration;
 
     const form = document.getElementById("costForm");
 
-    // Generate nested fields dynamically
-    for (const [groupName, groupValue] of Object.entries(initialConfig)) {
-        const groupDiv = form.querySelector(`[data-group="${groupName}"]`);
-        if (!groupDiv || typeof groupValue !== "object") continue;
-        
-        for (const [key, val] of Object.entries(groupValue)) {
-            const label = document.createElement("label");
-            label.textContent = key;
-            const input = document.createElement("input");
-            input.type = "number";
-            input.step = "0.5";
-            input.name = `${groupName}.${key}`;
-            input.value = val;
-            label.appendChild(input);
-            groupDiv.appendChild(label);
+    {
+        const formAlias = {
+          "regrip": "Regrip",
+          "double": "Double Move",
+          "repeatPenalty": "Repeat Fingertrick",
+          "wideMultiplier": "Wide Fingertrick Multiplier"
         }
-    }
 
-    // Populate top-level (regrip, wide, double)
-    for (const [key, value] of Object.entries(initialConfig)) {
-        const input = form.querySelector(`[name="${key}"]`);
-        if (input) input.value = value;
+        const formTitles = {
+          "double": "Only effective if Wide Replace Double is active",
+          "repeatPenalty": "The cost of doing the same fingertrick twice in a row",
+          "wideMultiplier": "How much the fingertrick cost should be scaled if it's a wide move"
+        }
+
+        const formTypes = {
+          "wideMultiplier": "scalar"
+        }
+      
+        for (const [groupName, groupValue] of Object.entries(initialConfig)) {
+            const groupDiv = form.querySelector(`[data-group="${groupName}"]`);
+            if (!groupDiv || typeof groupValue !== "object") continue;
+
+            for (const [key, val] of Object.entries(groupValue)) {
+                const label = document.createElement("label");
+                label.textContent = formAlias[key] || key;
+                label.title = formTitles[key] || "";
+                const input = document.createElement("input");
+                input.type = "number";
+                input.step = "0.5";
+                input.name = `${groupName}.${key}`;
+                input.value = val;
+                input.valueType = formTypes[key] || "additive";
+                //input.colorShift = formShifts[key] || -2;
+                label.appendChild(input);
+                groupDiv.appendChild(label);
+            }
+        }
     }
 
     // Submit handler
@@ -122,8 +141,9 @@ export function setupForm(onSubmit) {
         }
     });
 
-    const importFile = document.getElementById("importFile");
     document.getElementById("importButton").addEventListener("click", () => {
+        const importFile = document.getElementById("importFile");
+
         importFile.click();
         });
 
@@ -151,6 +171,25 @@ export function setupForm(onSubmit) {
 
     updateCostInputColors(form);
 
+}
+
+function migrateConfig(imported, defaults) {
+    const output = structuredClone(defaults);
+    for (const [key, value] of Object.entries(imported)) {
+        if (key in defaults) {
+            if (typeof value === "object") {
+                for (const [sub, subVal] of Object.entries(value)) {
+                    if (sub in defaults[key]) {
+                        output[key][sub] = subVal;
+                    }
+                }
+            } 
+            else {
+                output[key] = value;
+            }
+        }
+    }
+    return output;
 }
 
 function addDropdown(btn, content, name) {
@@ -244,7 +283,10 @@ function updateCostInputColors(form) {
 
     inputs.forEach(input => {
           const val = parseFloat(input.value);
-          input.style.backgroundColor = costToColor(val, 5, -2);
+          if(input.valueType == "additive")
+            input.style.backgroundColor = costToColor(val, 5, -2);
+          else if(input.valueType == "scalar")
+            input.style.backgroundColor = costToColor(val, 3, -2);
     });
 }
 

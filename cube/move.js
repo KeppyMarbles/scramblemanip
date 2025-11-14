@@ -92,6 +92,9 @@ export class Move {
                 return move;
             char = moveStr[index];
         }
+        else {
+            move.sliceNum = 1;
+        }
 
         // Optional '2' (double turn)
         if (char === "2") {

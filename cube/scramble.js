@@ -2,9 +2,12 @@ import { Move } from "./move.js";
 
 export class ScrambleOptimizer {
     static defaultCostConfiguration = {
-        regrip: 10,
-        double: 0,
-        repeatPenalty: 1,
+        general: {
+            "regrip" : 10,
+            "double": 0,
+            "repeatPenalty": 1,
+            "wideMultiplier": 1.5
+        },
         alpha: {
             "F": 0.5, "B": 3.5, "R": 0, "L": 2, "U": 0, "D": 2.5,
             "f": 1.5, "b": 4, "r": 0.5, "l": 2.5, "u": 1.5, "d": 3.5,
@@ -101,12 +104,12 @@ export class ScrambleOptimizer {
     computeTransitionCost(lastTransition, transition, move) { //TODO should probably have a better prevention of NaNs
         let added = 0;
         if (!transition) return 999999;
-        if (transition.regrip) added += this.config.regrip;
+        if (transition.regrip) added += this.config.general.regrip;
         added += this.config.grip[transition.next];
-        added += this.config.fingertrick[transition.type];
+        added += (move.isWide || move.sliceNum > 1)? this.config.fingertrick[transition.type] * this.config.general.wideMultiplier : this.config.fingertrick[transition.type];
         added += this.config.alpha[move.isWide ? move.alpha.toLowerCase() : move.alpha];
-        if(move.isDouble) added += this.config.double;
-        if(lastTransition?.type == transition.type) added += this.config.repeatPenalty;
+        if(move.isDouble) added += this.config.general.double;
+        if(lastTransition?.type == transition.type) added += this.config.general.repeatPenalty;
         return added;
     }
 

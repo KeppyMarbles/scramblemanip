@@ -39,7 +39,7 @@
               </label>
 
               <label title="The most the current cost can be above the best cost before pruning the branch. Increase this if you have negative cost values">Pruning Threshold
-                <input type="number" id="depth" value="2"/>
+                <input type="number" id="depth" value="1"/>
               </label>
 
               <label title="If a rotation search should stop if worse than the best rotation. Disable if you want more data">Prune Starting Rotations
@@ -96,11 +96,7 @@
                 <button type="button" data-tab="grip">Thumb Placement</button>
                 <button type="button" data-tab="fingertricks">Fingertricks</button>
               </div>
-                <div class="tab-content active" id="general">
-                  <label>Regrip <input type="number" step="0.5" name="regrip"></label>
-                  <label title="Effective only if Wide Replace Double is active">Double Move <input type="number" step="0.5" name="double"></label>
-                  <label title="The cost of doing the same fingertrick twice in a row">Repeat Fingertrick Penalty <input type="number" step="0.5" name="repeatPenalty"></label>
-                </div>
+                <div class="tab-content active" id="general" data-group="general"></div>
                 <div class="tab-content" id="face" data-group="alpha"></div>
                 <div class="tab-content" id="grip" data-group="grip"></div>
                 <div class="tab-content" id="fingertricks" data-group="fingertrick"></div>
