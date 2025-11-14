@@ -38,15 +38,15 @@
                 <input type="number" id="iterations" value="999999"/>
               </label>
 
-              <label title="The most the current cost can be above the best cost before pruning the branch">Pruning Threshold
-                <input type="number" id="depth" value="0"/>
+              <label title="The most the current cost can be above the best cost before pruning the branch. Increase this if you have negative cost values">Pruning Threshold
+                <input type="number" id="depth" value="2"/>
               </label>
 
-              <label title="If a rotation search should stop if worse than the best rotation">Prune Starting Rotations
+              <label title="If a rotation search should stop if worse than the best rotation. Disable if you want more data">Prune Starting Rotations
                 <input type="checkbox" id="pruneRotations" checked/>
               </label>
 
-              <label title="If reaching an already visited state [current grip & scramble index & cube orientation] should prune the current branch">Memoize
+              <label title="If reaching an already visited state [current grip & scramble index & cube orientation] should prune the current branch. Disable if you want to ensure minimization">Memoize
                 <input type="checkbox" id="memoize" checked/>
               </label>
             </div>
@@ -99,6 +99,7 @@
                 <div class="tab-content active" id="general">
                   <label>Regrip <input type="number" step="0.5" name="regrip"></label>
                   <label title="Effective only if Wide Replace Double is active">Double Move <input type="number" step="0.5" name="double"></label>
+                  <label title="The cost of doing the same fingertrick twice in a row">Repeat Fingertrick Penalty <input type="number" step="0.5" name="repeatPenalty"></label>
                 </div>
                 <div class="tab-content" id="face" data-group="alpha"></div>
                 <div class="tab-content" id="grip" data-group="grip"></div>

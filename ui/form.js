@@ -43,6 +43,7 @@ export function setupForm(onSubmit) {
             document.getElementById("errorMessage").textContent = "Error: " + err.message;
         }
     });
+
     document.getElementById("saveButton").addEventListener("click", (e) => {
         saveCostConfig(collectCostConfig(form, initialConfig));
     });
@@ -53,23 +54,8 @@ export function setupForm(onSubmit) {
         applyConfig(form, ScrambleOptimizer.defaultCostConfiguration);
     });
 
-    document.getElementById("toggleAdvanced").addEventListener("click", () => {
-      const content = document.getElementById("advancedContent");
-      const btn = document.getElementById("toggleAdvanced");
-      const isHidden = content.classList.toggle("hidden");
-      btn.textContent = isHidden
-        ? "Advanced Settings ▸"
-        : "Advanced Settings ▾";
-    });
-
-    document.getElementById("toggleConfig").addEventListener("click", () => {
-      const content = document.getElementById("configOptions");
-      const btn = document.getElementById("toggleConfig");
-      const isHidden = content.classList.toggle("hidden");
-      btn.textContent = isHidden
-        ? "Config Options ▸"
-        : "Config Options ▾";
-    });
+    addDropdown(document.getElementById("toggleAdvanced"), document.getElementById("advancedContent"), "Advanced Settings");
+    addDropdown(document.getElementById("toggleConfig"), document.getElementById("configOptions"), "Config Options");
 
     document.querySelectorAll('.tab-buttons button').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -86,6 +72,9 @@ export function setupForm(onSubmit) {
         { label: "Index Finger", targets: ["right_index", "right_index_push", "right_index_middle", "left_index", "left_index_middle"]},
         { label: "Twist Up", targets: ["right_up", "right_up_double", "left_up", "left_up_double"]},
         { label: "Twist Down", targets: ["right_down", "right_down_double", "left_down", "left_down_double"]},
+        { label: ""},
+        { label: "Right Hand", targets: ["right_index", "right_index_push", "right_index_middle", "right_ring", "right_ring_middle", "right_ring_push", "right_up", "right_up_double", "right_down", "right_down_double"]},
+        { label: "Left Hand", targets: ["left_index", "left_index_push", "left_index_middle", "left_ring", "left_ring_middle", "left_ring_push", "left_up", "left_up_double", "left_down", "left_down_double"]},
     ]);
 
     addGroupControls(form, "grip", [
@@ -117,7 +106,6 @@ export function setupForm(onSubmit) {
 
     document.getElementById("exportButton").addEventListener("click", () => {
         try {
-            const form = document.getElementById("costForm");
             const config = collectCostConfig(form, initialConfig);
             const json = JSON.stringify(config, null, 2);
             const blob = new Blob([json], { type: "application/json" });
@@ -147,13 +135,12 @@ export function setupForm(onSubmit) {
             const text = await file.text();
             const config = JSON.parse(text);
             applyConfig(document.getElementById("costForm"), config);
-            alert("Configuration imported successfully!");
         } 
         catch (err) {
             alert("Error importing configuration: " + err.message);
         }
 
-        importFile.value = ""; // reset so you can re-import same file later
+        importFile.value = "";
     });
 
     form.addEventListener("input", (e) => {
@@ -164,6 +151,15 @@ export function setupForm(onSubmit) {
 
     updateCostInputColors(form);
 
+}
+
+function addDropdown(btn, content, name) {
+    btn.addEventListener("click", () => {
+        const isHidden = content.classList.toggle("hidden");
+        btn.textContent = isHidden
+          ? name + " ▸"
+          : name + " ▾";
+    });
 }
 
 function addGroupControls(form, groupName, controls) {
@@ -292,7 +288,6 @@ function collectRunOptions() {
   const pruneRotations = document.getElementById("pruneRotations").checked;
   const memoize = document.getElementById("memoize").checked;
   const wideReplaceDouble = document.getElementById("wideReplaceDouble").checked;
-  
 
   if (Number.isNaN(depth) || Number.isNaN(maxIterations)) {
     throw new Error("Depth and iterations must be numbers");

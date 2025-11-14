@@ -1644,7 +1644,7 @@
     },
     "F": {
       "next": "D F",
-      "type": "right_index_push",
+      "type": "left_index_push",
       "regrip": false
     },
     "F2": {

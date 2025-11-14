@@ -4,6 +4,7 @@ export class ScrambleOptimizer {
     static defaultCostConfiguration = {
         regrip: 10,
         double: 0,
+        repeatPenalty: 1,
         alpha: {
             "F": 0.5, "B": 3.5, "R": 0, "L": 2, "U": 0, "D": 2.5,
             "f": 1.5, "b": 4, "r": 0.5, "l": 2.5, "u": 1.5, "d": 3.5,
@@ -97,7 +98,7 @@ export class ScrambleOptimizer {
         return this.transitions[grip]?.[moveKey];
     }
 
-    computeTransitionCost(transition, move) { //TODO should probably have a better prevention of NaNs
+    computeTransitionCost(lastTransition, transition, move) { //TODO should probably have a better prevention of NaNs
         let added = 0;
         if (!transition) return 999999;
         if (transition.regrip) added += this.config.regrip;
@@ -105,22 +106,12 @@ export class ScrambleOptimizer {
         added += this.config.fingertrick[transition.type];
         added += this.config.alpha[move.isWide ? move.alpha.toLowerCase() : move.alpha];
         if(move.isDouble) added += this.config.double;
+        if(lastTransition?.type == transition.type) added += this.config.repeatPenalty;
         return added;
     }
 
-    bruteforceOptimize(moves, index = 0, currentGrip = "start", currentCost = 0, orientation = {up: "U", front: "F"}) {
-        if(this.memoize) {
-            const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}|${moves.length}`;
-            //const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}`;
-            const oldBest = this.memo[key] ?? Infinity;
-            if (this.memo[key]+this.depth <= currentCost) 
-                return;
-            this.memo[key] = currentCost;
-        }
-
-        // TODO maybe reset count if we're making progress?
-
-        if (this.iterations > this.maxIterations) {
+    bruteforceOptimize(moves, index, currentGrip, currentCost, orientation, lastTransition) {
+        if (this.iterations >= this.maxIterations) {
             return;
         }
         if(this.pruneRotations && currentCost > this.bestCost+this.depth) {
@@ -129,7 +120,6 @@ export class ScrambleOptimizer {
         if(currentCost > this.minCost+this.depth) {
             return;
         }
-
         if (index >= moves.length) {
             if (currentCost < this.minCost) {
                 this.minCost = currentCost;
@@ -137,6 +127,13 @@ export class ScrambleOptimizer {
             }
             this.recordCost(currentCost);
             return;
+        }
+        if(this.memoize) {
+            const key = `${index}|${currentGrip}|${orientation.up}${orientation.front}|${moves.length}`;
+            const oldBest = this.memo[key] ?? Infinity;
+            if (this.memo[key]+this.depth <= currentCost) 
+                return;
+            this.memo[key] = currentCost;
         }
 
         function branchWithClone(inst, mutFn, skip = 1) {
@@ -147,19 +144,20 @@ export class ScrambleOptimizer {
 
             let cost = currentCost;
             let grip = currentGrip;
+            let transition;
             for(let i = 0; i < skip; i++) {
                 const moved = clone[index+i];
                 const movedKey = moved.toKey();
-                const transition = inst.getTransitionFor(grip, movedKey);
+                transition = inst.getTransitionFor(grip, movedKey);
                 if (!transition) {
                     //console.error("invalid branch", currentGrip, movedKey);
                     return;
                 }
-                cost += inst.computeTransitionCost(transition, moved);
+                cost += inst.computeTransitionCost(lastTransition, transition, moved);
                 grip = transition.next;
             }
 
-            inst.bruteforceOptimize(clone, index + skip, grip, cost, newOrientation);
+            inst.bruteforceOptimize(clone, index + skip, grip, cost, newOrientation, transition);
         }
 
         const move = moves[index];
@@ -268,6 +266,7 @@ export class ScrambleOptimizer {
         let currentGrip = "start";
         const breakdown = [];
 
+        let lastTransition;
         for (let i = 0; i < scramble.length; i++) {
             const move = scramble[i];
             const moveKey = move.toKey();
@@ -278,7 +277,8 @@ export class ScrambleOptimizer {
             }
 
             const nextGrip = transition.next;
-            const added = this.computeTransitionCost(transition, move);
+            const added = this.computeTransitionCost(lastTransition, transition, move);
+            lastTransition = transition;
 
             breakdown.push({
                 move: move.toString(),
