@@ -2,47 +2,46 @@ import { Move } from "./move.js";
 
 export class ScrambleOptimizer {
     static defaultCostConfiguration = {
-        general: {
-            "regrip" : 10,
+        "general": {
+            "regrip": 6,
             "double": 0,
             "repeatPenalty": 1,
-            "wideMultiplier": 1.5
+            "wideMultiplier": 2
         },
-        alpha: {
-            "F": 0.5, "B": 3.5, "R": 0, "L": 2, "U": 0, "D": 2.5,
-            "f": 1.5, "b": 4, "r": 0.5, "l": 2.5, "u": 1.5, "d": 3.5,
+        "alpha": { 
+            "F": 0, "B": 1, "R": 0, "L": 1, "U": 0, "D": 1,
+            "f": 3, "b": 3, "r": 1, "l": 2, "u": 3, "d": 3
         },
-        grip: {
-            "F F": 0, "F U": 0, "F D": 0, "F Bd": 2.5, "F Bu": 2.5, 
-            "U F": 0, "U U": 1, "U D": 0.5, "U Bd": 2.5, "U Bu": 2.5, 
-            "D F": 0, "D U": 0.5, "D D": 1, "D Bd": 2.5, "D Bu": 2.5, 
-            "Bd F": 2.5, "Bd U": 2.5, "Bd D": 2.5, "Bd Bd": 3.5, "Bd Bu": 3.5, 
-            "Bu F": 2.5, "Bu U": 2.5, "Bu D": 2.5, "Bu Bd": 3.5, "Bu Bu": 3.5,
+        "grip": {
+          "F F": 0, "F U": 0, "F D": 0, "F Bd": 1, "F Bu": 1, 
+          "U F": 0, "U U": 1, "U D": 0.5, "U Bd": 1, "U Bu": 1, 
+          "D F": 0, "D U": 0.5, "D D": 1, "D Bd": 1, "D Bu": 1, 
+          "Bd F": 1, "Bd U": 1, "Bd D": 1, "Bd Bd": 3, "Bd Bu": 3, 
+          "Bu F": 1, "Bu U": 1, "Bu D": 1, "Bu Bd": 3, "Bu Bu": 3
         },
-        fingertrick: {
-            "right_index": 0,
-            "right_index_push": 1,
-            "right_index_middle": 0,
-            "right_ring": 1,
-            "right_ring_middle": 1.5,
-            "right_ring_push": 3,
-            "right_up": 0,
-            "right_up_double": 0,
-            "right_down": 0,
-            "right_down_double": 0,
-            "left_index": 0,
-            "left_index_push": 3,
-            "left_index_middle": 0,
-            "left_ring": 1,
-            "left_ring_middle": 1.5,
-            "left_ring_push": 3,
-            "left_up": 0,
-            "left_up_double": 0,
-            "left_down": 0,
-            "left_down_double": 0,
+        "fingertrick": {
+          "right_index": 0,
+          "right_index_push": 2,
+          "right_index_middle": 0,
+          "right_ring": 1,
+          "right_ring_middle": 1,
+          "right_ring_push": 3,
+          "right_up": 0,
+          "right_up_double": 0,
+          "right_down": 0,
+          "right_down_double": 0,
+          "left_index": 0,
+          "left_index_push": 2,
+          "left_index_middle": 0,
+          "left_ring": 1,
+          "left_ring_middle": 1,
+          "left_ring_push": 3,
+          "left_up": 0,
+          "left_up_double": 0,
+          "left_down": 0,
+          "left_down_double": 0
         }
-    }   
-
+    }
     constructor(config, transitions, callback) {
         this.config = config;
         this.minScramble = scramble;
