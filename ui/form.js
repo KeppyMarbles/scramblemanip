@@ -140,14 +140,14 @@ export function setupForm(onSubmit) {
             alert("Error exporting configuration: " + err.message);
         }
     });
+    
+    const importFile = document.getElementById("importFile");
 
     document.getElementById("importButton").addEventListener("click", () => {
-        const importFile = document.getElementById("importFile");
-
         importFile.click();
-        });
+    });
 
-        importFile.addEventListener("change", async (e) => {
+    importFile.addEventListener("change", async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
