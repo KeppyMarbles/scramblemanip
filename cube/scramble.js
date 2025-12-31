@@ -1,5 +1,5 @@
 import { Move } from "./move.js";
-/** @import { CostConfig, TransitionConfig, Orientation, GripState, MoveKey, Transition, RunOptions, OrientationResultInfo, ScrambleBreakdownEntry } from "../types.js" */
+/** @import { CostConfig, TransitionConfig, Orientation, GripState, MoveKey, Transition, RunOptions, OrientationResultInfo, ScrambleBreakdownEntry, RotationStr, Rotation } from "../types.js" */
 
 /** @typedef {(moves: Move[], index: number, orientation: Orientation) => void} MoveTransform */
 
@@ -64,7 +64,7 @@ export class ScrambleOptimizer {
         this.minScramble = null;
         /** @type {number} The current minimum cost */
         this.minCost = Infinity;
-        /** @type {nubmer} The current number of iterations from bruteforceOptimize */
+        /** @type {number} The current number of iterations from bruteforceOptimize */
         this.iterations = 0;
         /** @type {Map<number, number>} Amount of found scrambles with a specific cost */
         this.distribution = null;
@@ -72,13 +72,13 @@ export class ScrambleOptimizer {
         this.depth = 0;
         /** @type {number} Number of iterations to try before bailing out */
         this.maxIterations = Infinity;
-        /** @type {Orientation} Current best orientation */
+        /** @type {Rotation} Current best orientation */
         this.bestRotation = null;
         /** @type {number} The lowest cost found for all orientations */
         this.bestCost = Infinity;
         /** @type {boolean} If an orientation search should be stopped if worse than best orientation */
         this.pruneRotations = true;
-        /** @type {number} The best scramble found for all orientations */
+        /** @type {Move[]} The best scramble found for all orientations */
         this.bestScramble = null;
         /** @type {boolean} If search shouldn't continue if same index, orientation and grip is reached */
         this.memoize = true;
@@ -86,7 +86,7 @@ export class ScrambleOptimizer {
         this.doWideReplaceDouble = true;
         /** @type {OrientationResultInfo[]} */
         this.rotationInfo = null;
-        /** @type {Record<string, number>} Memoization for all orientations */
+        /** @type {Map<string, number>} Memoization for all orientations */
         this.memo = new Map();
     }
 
@@ -271,7 +271,7 @@ export class ScrambleOptimizer {
         if(move.isDouble) { 
             if (!move.isPrime)
                 branchWithClone((arr, idx, or) => ScrambleOptimizer.primeReplace(arr, idx, or), 1);
-            
+
             // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
             if (!move.isWide) {
                 // prime + wide (prime then wideReplace)
@@ -293,8 +293,10 @@ export class ScrambleOptimizer {
      * @param {RunOptions} options 
      */
     async optimize(options) {
-        const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
-        const front_rotations = ["", "y", "y2", "y'"];
+        /** @type {RotationStr[]} */
+        const top_rotations = [null, "x2", "x'", "x", "z", "z'"];
+        /** @type {RotationStr[]} */
+        const front_rotations = [null, "y", "y2", "y'"];
 
         this.depth = options.depth;
         this.maxIterations = options.maxIterations;
@@ -303,7 +305,7 @@ export class ScrambleOptimizer {
         this.memoize = options.memoize;
         this.doWideReplaceDouble = options.wideReplaceDouble;
 
-        this.bestRotation = {top: null, front: null};
+        this.bestRotation = {up: null, front: null};
         this.bestCost = Infinity;
         this.distribution = new Map();
         this.rotationInfo = [];
@@ -318,11 +320,11 @@ export class ScrambleOptimizer {
                 const newOrientation = { ...orientation };
 
                 // transpose all moves according to the starting rotation
-                if (top_rot !== "") {
+                if (top_rot !== null) {
                     rotatedScramble.forEach(move => move.transpose(top_rot));
                     newOrientation.up = Move.TRANSPOSITIONS[top_rot][newOrientation.up];
                 }
-                if (front_rot !== "") {
+                if (front_rot !== null) {
                     rotatedScramble.forEach(move => move.transpose(front_rot));
                     newOrientation.front = Move.TRANSPOSITIONS[front_rot][newOrientation.front];
                 }
@@ -361,6 +363,8 @@ export class ScrambleOptimizer {
      */
     analyze(scramble) {
         let totalCost = 0;
+
+        /** @type {GripState} */
         let currentGrip = "start";
 
         /** @type {ScrambleBreakdownEntry[]} */

@@ -2,7 +2,7 @@ import { setupForm, drawSearchTime } from "./ui/form.js";
 import { ScrambleOptimizer } from "./cube/scramble.js";
 import { drawOptimizerStats } from "./ui/stats.js";
 import gripTransitions from './gripTransitions.json' with { type: 'json' };
-/** @import { CostConfig, RunOptions } from "../types.js" */
+/** @import { CostConfig, RunOptions } from "./types.js" */
 
 /**
  * Called when submit scramble button is pressed

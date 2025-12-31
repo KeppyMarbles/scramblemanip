@@ -1,3 +1,5 @@
+/** @import { Move } from "./cube/move.js" */
+
 /** @typedef {'F' | 'U' | 'D' | 'Bu' | 'Bd'} ThumbPosition */
 /** @typedef {"" | "'" | "2" | "2'"} ModifierStr */
 /** @typedef {"R" | "L" | "U" | "B" | "D" | "F"} FaceStr */
@@ -69,6 +71,12 @@
  * @property {FaceStr} front The face in front
  */
 
+/** 
+ * @typedef {Object} Rotation
+ * @property {RotationStr} up The top rotation
+ * @property {RotationStr} front The front rotation
+ */
+
 /**
  * @typedef {Object} RunOptions
  * @property {Move[]} scramble The scramble to optimize
@@ -82,7 +90,7 @@
 
 /**
  * @typedef OrientationResultInfo
- * @property {Orientation} rotation The orientation of the scramble
+ * @property {Rotation} rotation The rotation applied at the beginning of the scramble
  * @property {number} cost The scramble cost
  * @property {number} iterations The number of iterations of bruteforceOptimize
  * @property {boolean} maxed If the max iteration count was hit

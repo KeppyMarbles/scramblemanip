@@ -7,7 +7,7 @@ export class Move {
     /** @type {AxisStr[]} */
     static ROTATION_LIST = ["x", "y", "z"];
 
-    /** @type {Record<RotationStr, Record<FaceStr | AxisStr, FaceStr | AxisStr>} */
+    /** @type {Record<RotationStr, Record<FaceStr | AxisStr, FaceStr | AxisStr>>} */
     static TRANSPOSITIONS = { //TODO rotations?
         "x":   { "R": "R", "L": "L", "U": "B", "B": "D", "D": "F", "F": "U" },
         "x'":  { "R": "R", "L": "L", "U": "F", "B": "U", "D": "B", "F": "D" },
@@ -67,7 +67,7 @@ export class Move {
     }
 
     /**
-     * @param {MoveStr} moveStr 
+     * @param {MoveStr | RotationStr} moveStr 
      * @returns {Move}
      */
     static fromString(moveStr) {

@@ -312,7 +312,7 @@ function saveCostConfig(config) {
 
 /**
  * Get the cost configuration saved in local storage
- * @returns {CostConfig || null}
+ * @returns {CostConfig | null}
  */
 function loadCostConfig() {
     try {

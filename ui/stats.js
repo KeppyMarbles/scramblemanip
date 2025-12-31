@@ -1,5 +1,5 @@
 /** @import { ScrambleBreakdownEntry, OrientationResultInfo } from "../types.js" */
-/** @import { ScrambleOptimizer, OrientationResultInfo } from "../cube/scramble.js" */
+/** @import { ScrambleOptimizer } from "../cube/scramble.js" */
 
 /**
  * Show all the results of the scramble optimizer
