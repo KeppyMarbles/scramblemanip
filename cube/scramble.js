@@ -336,7 +336,7 @@ export class ScrambleOptimizer {
                 this.bruteforceOptimize(rotatedScramble, 0, "start", 0, newOrientation);
 
                 this.rotationInfo.push({ // TODO know the max index that was reached?
-                    rotation: {up: top_rot, front: front_rot}, 
+                    rotation: {up: top_rot || "", front: front_rot || ""}, 
                     cost: this.minCost, 
                     iterations: this.iterations,
                     maxed: this.iterations > this.maxIterations,
