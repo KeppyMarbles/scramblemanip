@@ -31,25 +31,27 @@
           </div>
 
           <div>
-            <button id="toggleAdvanced" class="section-button">Computation Settings ▸</button>
-            <div id="advancedContent" class="hidden">
+            <details>
+              <summary>Computation Settings</summary>
+              <div id="advancedContent">
+                <label title="Number of iterations to try on each orientation before bailing out">Max Iterations
+                  <input type="number" id="iterations" value="999999"/>
+                </label>
 
-              <label title="Number of iterations to try on each orientation before bailing out">Max Iterations
-                <input type="number" id="iterations" value="999999"/>
-              </label>
+                <label title="The most the current cost can be above the best cost before pruning the branch. Increase this if you have negative cost values">Pruning Threshold
+                  <input type="number" id="depth" value="1"/>
+                </label>
 
-              <label title="The most the current cost can be above the best cost before pruning the branch. Increase this if you have negative cost values">Pruning Threshold
-                <input type="number" id="depth" value="1"/>
-              </label>
+                <label title="If a rotation search should stop if worse than the best rotation. Disable if you want more data">Prune Starting Rotations
+                  <input type="checkbox" id="pruneRotations" checked/>
+                </label>
 
-              <label title="If a rotation search should stop if worse than the best rotation. Disable if you want more data">Prune Starting Rotations
-                <input type="checkbox" id="pruneRotations" checked/>
-              </label>
+                <label title="If reaching an already visited state [current grip & scramble index & cube orientation] should prune the current branch. Disable if you want to ensure minimization">Memoize
+                  <input type="checkbox" id="memoize" checked/>
+                </label>
+              </div>
+            </details>
 
-              <label title="If reaching an already visited state [current grip & scramble index & cube orientation] should prune the current branch. Disable if you want to ensure minimization">Memoize
-                <input type="checkbox" id="memoize" checked/>
-              </label>
-            </div>
           </div>
 
           <h3>Cost Distribution</h3>
@@ -103,20 +105,22 @@
             </div>
           </form>
           <div style="text-align: end; vertical-align: bottom;">
-            <button id="toggleConfig" class="section-button">Config Options ▸</button>
-            <div id="configOptions" class="hidden">
-              <div >
-                <button type="button" id="resetSavedButton">Reset To Saved</button>
-                <button type="button" id="resetDefaultButton">Reset To Defaults</button>
+            <details>
+              <summary>Config Options</summary>
+              <div id="configOptions">
+                <div>
+                  <button type="button" id="resetSavedButton">Reset To Saved</button>
+                  <button type="button" id="resetDefaultButton">Reset To Defaults</button>
+                </div>
+                <p></p>
+                <div class="config-buttons" style="text-align: end;">
+                  <button id="saveButton" type="button">Save</button>
+                  <button id="exportButton" type="button">Export</button>
+                  <button id="importButton" type="button">Import</button>
+                  <input id="importFile" type="file" accept=".json" style="display:none;">
+                </div>
               </div>
-              <p></p>
-              <div class="config-buttons" style="text-align: end;">
-                <button id="saveButton" type="button">Save</button>
-                <button id="exportButton" type="button">Export</button>
-                <button id="importButton" type="button">Import</button>
-                <input id="importFile" type="file" accept=".json" style="display:none;">
-              </div>
-            </div>
+            </details>
           </div>
       </div>
     <footer class="footer-fixed">

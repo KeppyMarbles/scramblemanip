@@ -1,6 +1,10 @@
 import { Move } from "./move.js";
+/** @import { CostConfig, TransitionConfig, Orientation, GripState, MoveKey, Transition, RunOptions, OrientationResultInfo, ScrambleBreakdownEntry } from "../types.js" */
+
+/** @typedef {(moves: Move[], index: number, orientation: Orientation) => void} MoveTransform */
 
 export class ScrambleOptimizer {
+    /** @type {CostConfig} */
     static defaultCostConfiguration = {
         "general": {
             "regrip": 6,
@@ -43,64 +47,140 @@ export class ScrambleOptimizer {
         }
     }
 
+    /**
+     * 
+     * @param {CostConfig} config 
+     * @param {TransitionConfig} transitions
+     * @param {()} callback
+     */
     constructor(config, transitions, callback) {
+        /** @type {CostConfig} */
         this.config = config;
-        this.minScramble = scramble;
-        this.minCost = Infinity;
-        this.iterations = 0;
-        this.distribution = null;
-        this.callback = callback;
+        /** @type {TransitionConfig} */
         this.transitions = transitions;
+        /** @type {()} Function to call when a rotation optimization finishes */
+        this.callback = callback;
+        /** @type {Move[]} The current minimum cost scramble */
+        this.minScramble = null;
+        /** @type {number} The current minimum cost */
+        this.minCost = Infinity;
+        /** @type {nubmer} The current number of iterations from bruteforceOptimize */
+        this.iterations = 0;
+        /** @type {Map<number, number>} Amount of found scrambles with a specific cost */
+        this.distribution = null;
+        /** @type {number} The branch pruning threshold */
+        this.depth = 0;
+        /** @type {number} Number of iterations to try before bailing out */
+        this.maxIterations = Infinity;
+        /** @type {Orientation} Current best orientation */
+        this.bestRotation = null;
+        /** @type {number} The lowest cost found for all orientations */
+        this.bestCost = Infinity;
+        /** @type {boolean} If an orientation search should be stopped if worse than best orientation */
+        this.pruneRotations = true;
+        /** @type {number} The best scramble found for all orientations */
+        this.bestScramble = null;
+        /** @type {boolean} If search shouldn't continue if same index, orientation and grip is reached */
+        this.memoize = true;
+        /** @type {boolean} If search should try replacing double moves with 1 wide and 1 normal move */
+        this.doWideReplaceDouble = true;
+        /** @type {OrientationResultInfo[]} */
+        this.rotationInfo = null;
+        /** @type {Record<string, number>} Memoization for all orientations */
+        this.memo = new Map();
     }
 
+    /**
+     * Changes the move at a given index to a wide move and updates the orientation
+     * @type {MoveTransform}
+     */
     static wideReplace(moves, index, orientation) {
         moves[index].alpha = Move.WIDE_EQUIVALENTS[moves[index].alpha]
         moves[index].isWide = true;
-        let rotation = Move.WIDE_ROTATIONS[moves[index].toKey()];
-        for(let i = index+1; i < moves.length; i++) {
-            moves[i].transpose(rotation);
-        }
-        orientation.up = Move.TRANSPOSITIONS[rotation][orientation.up];
-        orientation.front = Move.TRANSPOSITIONS[rotation][orientation.front];
+        ScrambleOptimizer._applyWideRotation(moves, index, orientation);
     }
 
-    static primeReplace(moves, index, orientation) {
-        moves[index].isPrime = true;
-    }
-
+    /**
+     * Changes a move at a given index to be composed of a wide move and a normal move (assumes given move is double)
+     * @type {MoveTransform}
+     */
     static wideReplaceDouble(moves, index, orientation) {
         const newMove = new Move(Move.WIDE_EQUIVALENTS[moves[index].alpha], moves[index].isPrime, false, false, true);
         moves[index].isDouble = false;
         moves.splice(index, 0, newMove);
-        let rotation = Move.WIDE_ROTATIONS[moves[index].toKey()]
-        for(let i = index+1; i < moves.length; i++) {
+        ScrambleOptimizer._applyWideRotation(moves, index, orientation);
+    }
+
+    /**
+     * Applies the rotation caused by a wide move at `index` to all subsequent moves and the cube orientation.
+     * @type {MoveTransform}
+     */
+    static _applyWideRotation(moves, index, orientation) {
+        const rotation = Move.WIDE_ROTATIONS[moves[index].toKey()];
+
+        for (let i = index + 1; i < moves.length; i++) {
             moves[i].transpose(rotation);
         }
+
         orientation.up = Move.TRANSPOSITIONS[rotation][orientation.up];
         orientation.front = Move.TRANSPOSITIONS[rotation][orientation.front];
     }
 
+    /**
+     * Changes the move at a given index to a prime move (assumes given move is double)
+     * @type {MoveTransform}
+     */
+    static primeReplace(moves, index, orientation) {
+        moves[index].isPrime = true;
+    }
+
+    /**
+     * @param {Move[]} moves 
+     * @returns {Move[]}
+     */
     static copyScramble(moves) {
         return moves.map(move=>new Move(move.alpha, move.isPrime, move.isDouble, move.isRotation, move.isWide, move.sliceNum));
     }
 
+    /**
+     * @param {string} string 
+     * @returns {Move[]}
+     */
     static parseScramble(string) {
         return string.split(" ").map(Move.fromString);
     }
 
+    /**
+     * @param {Move[]} scramble 
+     * @returns {string}
+     */
     static getScrambleString(scramble) {
         return scramble.map(m => m.toString()).join(" ");
     }
 
+    /**
+     * Adds a scramble cost to the current distribution
+     * @param {number} cost 
+     */
     recordCost(cost) {
         const rounded = Math.round(cost * 2) / 2;
         this.distribution.set(rounded, (this.distribution.get(rounded) || 0) + 1);
     }
 
+    /**
+     * @param {GripState} grip 
+     * @param {MoveKey} moveKey 
+     */
     getTransitionFor(grip, moveKey) { //TODO needed?
         return this.transitions[grip]?.[moveKey];
     }
 
+    /**
+     * @param {Transition} lastTransition 
+     * @param {Transition} transition 
+     * @param {Move} move
+     * @returns 
+     */
     computeTransitionCost(lastTransition, transition, move) { //TODO should probably have a better prevention of NaNs
         let added = 0;
         if (!transition) return 999999;
@@ -113,6 +193,14 @@ export class ScrambleOptimizer {
         return added;
     }
 
+    /**
+     * @param {Move[]} moves 
+     * @param {number} index 
+     * @param {GripState} currentGrip 
+     * @param {number} currentCost 
+     * @param {Orientation} orientation 
+     * @param {Transition} lastTransition 
+     */
     bruteforceOptimize(moves, index, currentGrip, currentCost, orientation, lastTransition) {
         if (this.iterations >= this.maxIterations) {
             return;
@@ -138,9 +226,14 @@ export class ScrambleOptimizer {
             this.memo[key] = currentCost;
         }
 
-        function branchWithClone(inst, mutFn, skip = 1) {
+        /**
+         * Create a new branch with a copied, mutated scramble
+         * @param {MoveTransform | null} mutFn 
+         * @param {number} skip Number of indices to jump
+         */
+        const branchWithClone = (mutFn, skip = 1) => {
             const clone = ScrambleOptimizer.copyScramble(moves);
-            const newOrientation = {up: orientation.up, front: orientation.front};
+            const newOrientation = { ...orientation };
             if(mutFn)
               mutFn(clone, index, newOrientation);
 
@@ -150,98 +243,98 @@ export class ScrambleOptimizer {
             for(let i = 0; i < skip; i++) {
                 const moved = clone[index+i];
                 const movedKey = moved.toKey();
-                transition = inst.getTransitionFor(grip, movedKey);
+                transition = this.getTransitionFor(grip, movedKey);
                 if (!transition) {
                     //console.error("invalid branch", currentGrip, movedKey);
                     return;
                 }
-                cost += inst.computeTransitionCost(lastTransition, transition, moved);
+                cost += this.computeTransitionCost(lastTransition, transition, moved);
                 grip = transition.next;
             }
 
-            inst.bruteforceOptimize(clone, index + skip, grip, cost, newOrientation, transition);
+            this.bruteforceOptimize(clone, index + skip, grip, cost, newOrientation, transition);
         }
 
         const move = moves[index];
         this.iterations++;
 
-        branchWithClone(this, null, 1);
+        branchWithClone(null, 1);
 
         if(move.isRotation)
             return;
 
         // wide variation (single-layer wide)
-        if (!move.isWide) {
-            branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.wideReplace(arr, idx, or), 1);
-        }
+        if (!move.isWide)
+            branchWithClone((arr, idx, or) => ScrambleOptimizer.wideReplace(arr, idx, or), 1);
 
         // prime variation for double (turn R2 into R2' variant)
         if(move.isDouble) { 
-            if (!move.isPrime) {
-                branchWithClone(this, (arr, idx, or) => ScrambleOptimizer.primeReplace(arr, idx, or), 1);
-            }
+            if (!move.isPrime)
+                branchWithClone((arr, idx, or) => ScrambleOptimizer.primeReplace(arr, idx, or), 1);
+            
             // Combinations (prime + wide, prime + wideReplaceDouble, etc.)
             if (!move.isWide) {
                 // prime + wide (prime then wideReplace)
-                branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplace(arr, idx, or); }, 1);
+                branchWithClone((arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplace(arr, idx, or); }, 1);
 
                 if(this.doWideReplaceDouble) {
                     // wideReplaceDouble (change double move into 1 face move and 1 wide move)
                     // inserts an extra move at index (length increases) so skip=2
-                    branchWithClone(this, (arr, idx, or) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx, or), 2);
+                    branchWithClone((arr, idx, or) =>  ScrambleOptimizer.wideReplaceDouble(arr, idx, or), 2);
                     if(!move.isPrime)
-                        branchWithClone(this, (arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplaceDouble(arr, idx, or); }, 2);
+                        branchWithClone((arr, idx, or) => { ScrambleOptimizer.primeReplace(arr, idx, or); ScrambleOptimizer.wideReplaceDouble(arr, idx, or); }, 2);
                 }
             }
         }
     }
 
+    /**
+     * Calls bruteforceOptimize for all orientations of the cube to find the best one
+     * @param {RunOptions} options 
+     */
     async optimize(options) {
         const top_rotations = ["", "x2", "x'", "x", "z", "z'"];
         const front_rotations = ["", "y", "y2", "y'"];
 
         this.depth = options.depth;
         this.maxIterations = options.maxIterations;
+        this.pruneRotations = options.pruneRotations;
+        this.bestScramble = options.scramble;
+        this.memoize = options.memoize;
+        this.doWideReplaceDouble = options.wideReplaceDouble;
 
         this.bestRotation = {top: null, front: null};
         this.bestCost = Infinity;
-        this.bestScramble = options.scramble;
         this.distribution = new Map();
-        this.pruneRotations = options.pruneRotations;
-        this.memoize = options.memoize;
-        this.doWideReplaceDouble = options.wideReplaceDouble;
         this.rotationInfo = [];
         this.memo = new Map();
 
+        /** @type {Orientation} */
         const orientation = {up: "U", front: "F"};
 
         for (const top_rot of top_rotations) {
             for(const front_rot of front_rotations) {
-
                 const rotatedScramble = ScrambleOptimizer.copyScramble(options.scramble);
-                const newOrientation = {up: orientation.up, front: orientation.front};
+                const newOrientation = { ...orientation };
+
                 // transpose all moves according to the starting rotation
                 if (top_rot !== "") {
-                    for (const move of rotatedScramble) {
-                        move.transpose(top_rot);
-                    }
+                    rotatedScramble.forEach(move => move.transpose(top_rot));
                     newOrientation.up = Move.TRANSPOSITIONS[top_rot][newOrientation.up];
                 }
                 if (front_rot !== "") {
-                    for (const move of rotatedScramble) {
-                        move.transpose(front_rot);
-                    }
+                    rotatedScramble.forEach(move => move.transpose(front_rot));
                     newOrientation.front = Move.TRANSPOSITIONS[front_rot][newOrientation.front];
                 }
 
-                this.minCost = Infinity;
-                this.minScramble = scramble;
+                this.minCost = Infinity; //TODO move to context object that we pass to bruteforceOptimize?
+                this.minScramble = null;
                 this.iterations = 0;
             
                 this.bruteforceOptimize(rotatedScramble, 0, "start", 0, newOrientation);
 
                 this.rotationInfo.push({ // TODO know the max index that was reached?
-                    rotation: {top: top_rot, front: front_rot}, 
+                    rotation: {up: top_rot, front: front_rot}, 
                     cost: this.minCost, 
                     iterations: this.iterations,
                     maxed: this.iterations > this.maxIterations,
@@ -251,7 +344,7 @@ export class ScrambleOptimizer {
                 if (this.minCost < this.bestCost) {
                     this.bestCost = this.minCost;
                     this.bestScramble = ScrambleOptimizer.copyScramble(this.minScramble);
-                    this.bestRotation = {top: top_rot, front: front_rot};
+                    this.bestRotation = {up: top_rot, front: front_rot};
                 }
 
                 if(this.callback)
@@ -263,9 +356,14 @@ export class ScrambleOptimizer {
         }
     }
     
+    /**
+     * @param {Move[]} scramble 
+     */
     analyze(scramble) {
         let totalCost = 0;
         let currentGrip = "start";
+
+        /** @type {ScrambleBreakdownEntry[]} */
         const breakdown = [];
 
         let lastTransition;
@@ -279,16 +377,12 @@ export class ScrambleOptimizer {
             }
 
             const nextGrip = transition.next;
-            const added = this.computeTransitionCost(lastTransition, transition, move);
+            const addedCost = this.computeTransitionCost(lastTransition, transition, move);
             lastTransition = transition;
 
-            breakdown.push({
-                move: move.toString(),
-                transition,
-                addedCost: added,
-            });
+            breakdown.push({move: move.toString(), transition, addedCost });
 
-            totalCost += added;
+            totalCost += addedCost;
             currentGrip = nextGrip;
         }
 
@@ -305,8 +399,8 @@ export class ScrambleOptimizer {
         const scramble = ScrambleOptimizer.copyScramble(this.bestScramble);
         if(this.bestRotation.front)
             scramble.unshift(Move.fromString(this.bestRotation.front));
-        if(this.bestRotation.top)
-            scramble.unshift(Move.fromString(this.bestRotation.top));
+        if(this.bestRotation.up)
+            scramble.unshift(Move.fromString(this.bestRotation.up));
 
         return ScrambleOptimizer.getScrambleString(scramble);
     }

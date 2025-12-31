@@ -1,31 +1,43 @@
 import { ScrambleOptimizer } from "../cube/scramble.js";
 import { costToColor } from "./stats.js";
+/** @import { CostConfig, RunOptions } from "../types.js" */
 
+/**
+ * @typedef {Object} GroupControl
+ * @property {string} label
+ * @property {string[]} targets
+ */
+
+/**
+ * Set up everything needed for the user to configure the optimizer
+ * @param {()} onSubmit
+ */
 export function setupForm(onSubmit) {
     let initialConfig = loadCostConfig();
     if(initialConfig)
-      initialConfig = migrateConfig(initialConfig, ScrambleOptimizer.defaultCostConfiguration);
+        initialConfig = migrateConfig(initialConfig, ScrambleOptimizer.defaultCostConfiguration);
     else
-      initialConfig = ScrambleOptimizer.defaultCostConfiguration;
+        initialConfig = ScrambleOptimizer.defaultCostConfiguration;
 
+    /** @type {HTMLFormElement} */
     const form = document.getElementById("costForm");
 
     {
         const formAlias = {
-          "regrip": "Regrip",
-          "double": "Double Move",
-          "repeatPenalty": "Repeat Fingertrick",
-          "wideMultiplier": "Wide Fingertrick Multiplier"
+            "regrip": "Regrip",
+            "double": "Double Move",
+            "repeatPenalty": "Repeat Fingertrick",
+            "wideMultiplier": "Wide Fingertrick Multiplier"
         }
 
         const formTitles = {
-          "double": "Only effective if Wide Replace Double is active",
-          "repeatPenalty": "The cost of doing the same fingertrick twice in a row",
-          "wideMultiplier": "How much the fingertrick cost should be scaled if it's a wide move"
+            "double": "Only effective if Wide Replace Double is active",
+            "repeatPenalty": "The cost of doing the same fingertrick twice in a row",
+            "wideMultiplier": "How much the fingertrick cost should be scaled if it's a wide move"
         }
 
         const formTypes = {
-          "wideMultiplier": "scalar"
+            "wideMultiplier": "scalar"
         }
       
         for (const [groupName, groupValue] of Object.entries(initialConfig)) {
@@ -56,7 +68,7 @@ export function setupForm(onSubmit) {
         try {
             const config = collectCostConfig(form, initialConfig);
             const options = collectRunOptions();
-            onSubmit({ config, options });
+            onSubmit(config, options);
         } 
         catch (err) {
             document.getElementById("errorMessage").textContent = "Error: " + err.message;
@@ -73,16 +85,13 @@ export function setupForm(onSubmit) {
         applyConfig(form, ScrambleOptimizer.defaultCostConfiguration);
     });
 
-    addDropdown(document.getElementById("toggleAdvanced"), document.getElementById("advancedContent"), "Advanced Settings");
-    addDropdown(document.getElementById("toggleConfig"), document.getElementById("configOptions"), "Config Options");
-
     document.querySelectorAll('.tab-buttons button').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tab).classList.add('active');
-      });
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-buttons button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
     });
 
     addGroupControls(form, "fingertrick", [
@@ -170,9 +179,13 @@ export function setupForm(onSubmit) {
     });
 
     updateCostInputColors(form);
-
 }
 
+/**
+ * @param {Object} imported 
+ * @param {Object} defaults 
+ * @returns 
+ */
 function migrateConfig(imported, defaults) {
     const output = structuredClone(defaults);
     for (const [key, value] of Object.entries(imported)) {
@@ -192,15 +205,13 @@ function migrateConfig(imported, defaults) {
     return output;
 }
 
-function addDropdown(btn, content, name) {
-    btn.addEventListener("click", () => {
-        const isHidden = content.classList.toggle("hidden");
-        btn.textContent = isHidden
-          ? name + " ▸"
-          : name + " ▾";
-    });
-}
-
+/**
+ * Adds bulk adjustments to the form
+ * @param {HTMLFormElement} form 
+ * @param {string} groupName 
+ * @param {GroupControl[]} controls 
+ * @returns 
+ */
 function addGroupControls(form, groupName, controls) {
     const groupDiv = document.querySelector(`[data-group="${groupName}"]`);
     if (!groupDiv) return;
@@ -217,8 +228,6 @@ function addGroupControls(form, groupName, controls) {
 
     // Create controls
     for (const ctrl of controls) {
-
-
         const div = document.createElement("div");
         div.style = "text-align: right;";
 
@@ -247,7 +256,6 @@ function addGroupControls(form, groupName, controls) {
 
         div.appendChild(minus);
         div.appendChild(plus);
-
 
         for(const btn of [minus, plus]) {
             btn.addEventListener('click', () => {
@@ -278,86 +286,117 @@ function addGroupControls(form, groupName, controls) {
     });
 }
 
+/**
+ * Updates the background color of each numeric input
+ * @param {HTMLFormElement} form 
+ */
 function updateCostInputColors(form) {
     const inputs = form.querySelectorAll('input[type="number"]');
 
     inputs.forEach(input => {
-          const val = parseFloat(input.value);
-          if(input.valueType == "additive")
+        const val = parseFloat(input.value);
+        if(input.valueType == "additive")
             input.style.backgroundColor = costToColor(val, 5, -2);
-          else if(input.valueType == "scalar")
+        else if(input.valueType == "scalar")
             input.style.backgroundColor = costToColor(val, 3, -2);
     });
 }
 
+/**
+ * Save config to local storage
+ * @param {CostConfig} config 
+ */
 function saveCostConfig(config) {
-  localStorage.setItem("costConfig", JSON.stringify(config));
+    localStorage.setItem("costConfig", JSON.stringify(config));
 }
 
+/**
+ * Get the cost configuration saved in local storage
+ * @returns {CostConfig || null}
+ */
 function loadCostConfig() {
-  try {
-    const stored = localStorage.getItem("costConfig");
-    return stored ? JSON.parse(stored) : null;
-  } 
-  catch {
-    return null;
-  }
+    try {
+        const stored = localStorage.getItem("costConfig");
+        return stored ? JSON.parse(stored) : null;
+    } 
+    catch {
+        return null;
+    }
 }
 
+/**
+ * Get the cost configuration from the cost form
+ * @param {*} form 
+ * @param {CostConfig} initialConfig 
+ * @returns {CostConfig}
+ */
 function collectCostConfig(form, initialConfig) {
-  const newConfig = structuredClone(initialConfig);
-  const formData = new FormData(form);
+    const newConfig = structuredClone(initialConfig);
+    const formData = new FormData(form);
 
-  for (const [fullKey, val] of formData.entries()) {
-    const num = parseFloat(val);
-    if (fullKey.includes(".")) {
-      const [group, subkey] = fullKey.split(".");
-      newConfig[group][subkey] = num;
-    } 
-    else {
-      newConfig[fullKey] = num;
+    for (const [fullKey, val] of formData.entries()) {
+        const num = parseFloat(val);
+        if (fullKey.includes(".")) {
+            const [group, subkey] = fullKey.split(".");
+            newConfig[group][subkey] = num;
+        } 
+        else {
+            newConfig[fullKey] = num;
+        }
     }
-  }
 
-  return newConfig;
+    return newConfig;
 }
 
+/**
+ * Get all optimizer options from the document
+ * @returns {RunOptions}
+ */
 function collectRunOptions() {
-  const scramble = ScrambleOptimizer.parseScramble(document.getElementById("scramble").value.trim());
-  const depth = parseFloat(document.getElementById("depth").value);
-  const maxIterations = parseFloat(document.getElementById("iterations").value);
-  const searchRotations = document.getElementById("searchRotations").checked;
-  const pruneRotations = document.getElementById("pruneRotations").checked;
-  const memoize = document.getElementById("memoize").checked;
-  const wideReplaceDouble = document.getElementById("wideReplaceDouble").checked;
+    const scramble = ScrambleOptimizer.parseScramble(document.getElementById("scramble").value.trim());
+    const depth = parseFloat(document.getElementById("depth").value);
+    const maxIterations = parseFloat(document.getElementById("iterations").value);
+    const searchRotations = document.getElementById("searchRotations").checked;
+    const pruneRotations = document.getElementById("pruneRotations").checked;
+    const memoize = document.getElementById("memoize").checked;
+    const wideReplaceDouble = document.getElementById("wideReplaceDouble").checked;
 
-  if (Number.isNaN(depth) || Number.isNaN(maxIterations)) {
-    throw new Error("Depth and iterations must be numbers");
-  }
-  for(const move of scramble) {
-    if(move.isRotation)
-        throw new Error("Rotations not supported yet");
-  }
-
-  return { scramble, depth, maxIterations, searchRotations, pruneRotations, memoize, wideReplaceDouble };
-}
-
-function applyConfig(form, config) {
-  for (const [groupName, groupValue] of Object.entries(config)) {
-    if (typeof groupValue === "object") {
-      for (const [key, val] of Object.entries(groupValue)) {
-        const input = form.querySelector(`[name="${groupName}.${key}"]`);
-        if (input) input.value = val;
-      }
-    } 
-    else {
-      const input = form.querySelector(`[name="${groupName}"]`);
-      if (input) input.value = groupValue;
+    if (Number.isNaN(depth) || Number.isNaN(maxIterations)) {
+        throw new Error("Depth and iterations must be numbers");
     }
-  }
-  updateCostInputColors(form);
+    for(const move of scramble) {
+        if(move.isRotation)
+            throw new Error("Rotations not supported yet");
+    }
+
+    return { scramble, depth, maxIterations, searchRotations, pruneRotations, memoize, wideReplaceDouble };
 }
 
+/**
+ * Populate the form with a given configuration
+ * @param {HTMLFormElement} form 
+ * @param {Object} config 
+ */
+function applyConfig(form, config) {
+    for (const [groupName, groupValue] of Object.entries(config)) {
+        if (typeof groupValue === "object") {
+            for (const [key, val] of Object.entries(groupValue)) {
+                const input = form.querySelector(`[name="${groupName}.${key}"]`);
+                if (input) input.value = val;
+            }
+        } 
+        else {
+            const input = form.querySelector(`[name="${groupName}"]`);
+            if (input) input.value = groupValue;
+        }
+    }
+    updateCostInputColors(form);
+}
+
+/**
+ * Show the amount of time taken to optimize
+ * @param {number} time 
+ */
 export function drawSearchTime(time) {
     document.getElementById("searchTime").textContent = new Date(time).toISOString().slice(11, -1)
 }

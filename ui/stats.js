@@ -1,3 +1,10 @@
+/** @import { ScrambleBreakdownEntry, OrientationResultInfo } from "../types.js" */
+/** @import { ScrambleOptimizer, OrientationResultInfo } from "../cube/scramble.js" */
+
+/**
+ * Show all the results of the scramble optimizer
+ * @param {ScrambleOptimizer} optimizer 
+ */
 export async function drawOptimizerStats(optimizer) {
     if(optimizer) {
         drawDistributionChart(optimizer.distribution);
@@ -15,6 +22,10 @@ export async function drawOptimizerStats(optimizer) {
     await new Promise(requestAnimationFrame);
 }
 
+/**
+ * Chart the number of found scrambles for each cost
+ * @param {Map<number, number>} distribution 
+ */
 function drawDistributionChart(distribution) {
     const costs = Array.from(distribution.keys()).sort((a, b) => a - b);
     const counts = costs.map(c => distribution.get(c));
@@ -24,19 +35,9 @@ function drawDistributionChart(distribution) {
         type: 'bar',
     }];
     const layout = {
-        margin: {
-          l: 50,
-          r: 50,
-          b: 50,
-          t: 10,
-          pad: 4
-        },
-        xaxis: {
-            title: "Scramble Cost",
-        },
-        yaxis: {
-            title: "Scrambles Found"
-        },
+        margin: { l: 50, r: 50, b: 50, t: 10, pad: 4 },
+        xaxis: { title: "Scramble Cost" },
+        yaxis: { title: "Scrambles Found" },
         paper_bgcolor: document.body.style.backgroundColor,
         plot_bgcolor: document.body.style.backgroundColor
     };
@@ -58,56 +59,69 @@ function drawDistributionChart(distribution) {
     document.getElementById("minZ").textContent = zScore.toFixed(3);
 }
 
+/**
+ * Get a color between red and green based on value
+ * @param {number} cost 
+ * @param {number} maxAbsCost The magnitude needed for maximum color
+ * @param {number} shift Amount to move base color
+ */
 export function costToColor(cost, maxAbsCost, shift) {
-  cost += shift;
-  const ratio = Math.max(-1, Math.min(1, cost / maxAbsCost));
-  const hue = 60 - ratio * 60;
-  return `hsl(${hue}, 100%, 65%)`;
+    cost += shift;
+    const ratio = Math.max(-1, Math.min(1, cost / maxAbsCost));
+    const hue = 60 - ratio * 60;
+    return `hsl(${hue}, 100%, 65%)`;
 }
 
+/**
+ * Display grip, fingertrick, and cost of each move
+ * @param {ScrambleBreakdownEntry[]} breakdowns
+ */
 function drawCostTable(breakdowns) {
   
-  const tbody = document.querySelector("#costTable tbody");
-  tbody.innerHTML = "";
+    const tbody = document.querySelector("#costTable tbody");
+    tbody.innerHTML = "";
 
-  let total = 0;
-  for (const row of breakdowns) {
-    total += row.addedCost;
-    const tr = document.createElement("tr");
-    const color = costToColor(row.addedCost, 5, -2);
-    tr.innerHTML = `
-      <td>${row.move}</td>
-      <td>${row.transition?.next || "(none)"}</td>
-      <td>${row.transition?.type || "(none)"}</td>
-      
-      <td style="background:${color};text-align:right">${row.addedCost}</td>
-    `;
-    tbody.appendChild(tr);
-  }
+    let total = 0;
+    for (const row of breakdowns) {
+        total += row.addedCost;
+        const tr = document.createElement("tr");
+        const color = costToColor(row.addedCost, 5, -2);
+        tr.innerHTML = `
+            <td>${row.move}</td>
+            <td>${row.transition?.next || "(none)"}</td>
+            <td>${row.transition?.type || "(none)"}</td>
+            
+            <td style="background:${color};text-align:right">${row.addedCost}</td>
+        `;
+        tbody.appendChild(tr);
+    }
 
-  const totalRow = document.createElement("tr");
-  totalRow.innerHTML = `<td colspan="2"><b>Total</b></td><td><b>${total}</b></td>`;
-  tbody.appendChild(totalRow);
+    const totalRow = document.createElement("tr");
+    totalRow.innerHTML = `<td colspan="2"><b>Total</b></td><td><b>${total}</b></td>`;
+    tbody.appendChild(totalRow);
 }
 
+/**
+ * Show the iteration count and best cost for each orientation
+ * @param {OrientationResultInfo[]} info
+ */
 function drawRotationInfoTable(info) {
-  const tbody = document.querySelector("#rotationTable tbody");
-  tbody.innerHTML = "";
+    const tbody = document.querySelector("#rotationTable tbody");
+    tbody.innerHTML = "";
 
-  let total = 0;
-  for (const row of info) { //TODO sort by best cost
-    total += row.iterations;
-    const tr = document.createElement("tr");
-    const color = costToColor(row.cost, 80, -20); //TODO set this based on average costs?
-    tr.innerHTML = `
-      <td>${row.rotation.top} ${row.rotation.front}</td>
-      <td style=${row.maxed ? `background:#ff0000` : ""}>${row.iterations}</td>
-      <td style="background:${color};text-align:right">${row.cost}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  const totalRow = document.createElement("tr");
-  totalRow.innerHTML = `<td colspan="1"><b>Total Iterations</b></td><td><b>${total}</b></td>`;
-  tbody.appendChild(totalRow);
+    let total = 0;
+    for (const row of info) { //TODO sort by best cost
+        total += row.iterations;
+        const tr = document.createElement("tr");
+        const color = costToColor(row.cost, 80, -20); //TODO set this based on average costs?
+        tr.innerHTML = `
+            <td>${row.rotation.up} ${row.rotation.front}</td>
+            <td style=${row.maxed ? `background:#ff0000` : ""}>${row.iterations}</td>
+            <td style="background:${color};text-align:right">${row.cost}</td>
+        `;
+        tbody.appendChild(tr);
+    }
+    const totalRow = document.createElement("tr");
+    totalRow.innerHTML = `<td colspan="1"><b>Total Iterations</b></td><td><b>${total}</b></td>`;
+    tbody.appendChild(totalRow);
 }

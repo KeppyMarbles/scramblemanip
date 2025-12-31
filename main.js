@@ -2,23 +2,25 @@ import { setupForm, drawSearchTime } from "./ui/form.js";
 import { ScrambleOptimizer } from "./cube/scramble.js";
 import { drawOptimizerStats } from "./ui/stats.js";
 import gripTransitions from './gripTransitions.json' with { type: 'json' };
+/** @import { CostConfig, RunOptions } from "../types.js" */
 
-var optimizer;
-
-async function onSubmit({ config, options }) {
+/**
+ * Called when submit scramble button is pressed
+ * @param {CostConfig} config
+ * @param {RunOptions} options 
+ */
+async function onSubmit(config, options) {
     await drawOptimizerStats(null);
 
-    optimizer = new ScrambleOptimizer(config, gripTransitions, onRotationDone);
+    const optimizer = new ScrambleOptimizer(config, gripTransitions, async () => {
+        await drawOptimizerStats(optimizer);
+    });
 
     const start = performance.now();
     await optimizer.optimize(options);
     const end = performance.now();
 
     drawSearchTime(end - start);
-}
-
-async function onRotationDone() {
-  await drawOptimizerStats(optimizer);
 }
 
 setupForm(onSubmit);

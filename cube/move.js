@@ -1,7 +1,13 @@
+/** @import { FaceStr, RotationStr, AxisStr, MoveStr, MoveKey } from "../types.js" */
+
 export class Move {
+    /** @type {FaceStr[]} */
     static MOVE_LIST = ["R", "L", "U", "D", "F", "B"];
+
+    /** @type {AxisStr[]} */
     static ROTATION_LIST = ["x", "y", "z"];
 
+    /** @type {Record<RotationStr, Record<FaceStr | AxisStr, FaceStr | AxisStr>} */
     static TRANSPOSITIONS = { //TODO rotations?
         "x":   { "R": "R", "L": "L", "U": "B", "B": "D", "D": "F", "F": "U" },
         "x'":  { "R": "R", "L": "L", "U": "F", "B": "U", "D": "B", "F": "D" },
@@ -17,6 +23,7 @@ export class Move {
         "z2'": { "R": "L", "L": "R", "U": "D", "B": "B", "D": "U", "F": "F" },
     }
 
+    /** @type {Record<MoveKey, RotationStr>} */
     static WIDE_ROTATIONS = {
         "R": "x",  "R'": "x'", "R2": "x2",  "R2'": "x2'",
         "L": "x'", "L'": "x",  "L2": "x2'", "L2'": "x2",
@@ -26,6 +33,7 @@ export class Move {
         "B": "z'", "B'": "z",  "B2": "z2'", "B2'": "z2",
     };
 
+    /** @type {Record<FaceStr, FaceStr>} */
     static WIDE_EQUIVALENTS = {
         R: 'L',
         L: 'R',
@@ -35,15 +43,33 @@ export class Move {
         B: 'F'
     };
 
+    /**
+     * @param {FaceStr | AxisStr} alpha 
+     * @param {boolean} isPrime
+     * @param {boolean} isDouble 
+     * @param {boolean} isRotation 
+     * @param {boolean} isWide 
+     * @param {number} sliceNum 
+     */
     constructor(alpha, isPrime, isDouble, isRotation, isWide, sliceNum) {
-        this.alpha = alpha;
-        this.isPrime = isPrime;
+        /** @type {FaceStr | AxisStr} */
+        this.alpha = alpha; 
+        /** @type {boolean} */ 
+        this.isPrime = isPrime; 
+        /** @type {boolean} */ 
         this.isDouble = isDouble;
+        /** @type {boolean} */ 
         this.isWide = isWide;
+        /** @type {boolean} */ 
         this.isRotation = isRotation;
+        /** @type {number} */ 
         this.sliceNum = sliceNum;
     }
 
+    /**
+     * @param {MoveStr} moveStr 
+     * @returns {Move}
+     */
     static fromString(moveStr) {
         const move = new Move();
         let index = 0;
@@ -120,6 +146,9 @@ export class Move {
         return move;
     }
 
+    /**
+     * @returns {MoveStr}
+     */
     toString() { // TODO bool for replacing lowercase with slice count?
         let s = "";
         if (this.sliceNum > 2) s += this.sliceNum;
@@ -130,6 +159,9 @@ export class Move {
         return s;
     }
 
+    /**
+     * @returns {MoveKey}
+     */
     toKey() {
         let s = this.alpha;
         if (this.isDouble) s += "2";
@@ -137,9 +169,11 @@ export class Move {
         return s;
     }
 
+    /**
+     * Update this move to its equivalent after a rotation is performed
+     * @param {RotationStr} string 
+     */
     transpose(string) {
         this.alpha = Move.TRANSPOSITIONS[string][this.alpha];
     }
-
-
 }
