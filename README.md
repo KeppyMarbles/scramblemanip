@@ -16,3 +16,9 @@ A tool for generating more ergonomic versions of Rubik's cube scrambles. Current
  - No analysis for rotations or slice moves yet.
  - Just a webpage at the momement, no extra tools or API.
    - I'm new to web dev stuff so the site is pretty minimal.
+
+## Screenshots
+<details>
+<summary>Main Page</summary>
+<img width="1884" height="1072" alt="ss" src="https://github.com/user-attachments/assets/1b51e1ab-f9dd-44aa-9a5b-3e20e79832cd" />
+</details>
